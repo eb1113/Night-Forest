@@ -10,3 +10,5 @@
 #include "ObjLoader.h"
 #include "Window.h"
 #include "camera/Camera.h"
+#include "TileMap/TileMap.h"
+#include "shaders/Shader.h"

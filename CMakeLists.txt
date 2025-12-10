@@ -17,6 +17,8 @@ add_executable(nightforest
     src/Window.cpp
     src/camera/Camera.cpp
     src/camera/EulerAngle.cpp
+    src/shaders/Shader.cpp
+    src/TileMap/TileMap.cpp
 )
 
 # Includes
