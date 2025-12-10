@@ -1,84 +1,18 @@
-# -------------------------
-# Build / CMake
-# -------------------------
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-*.cmake
+# Build / output
 build/
 bin/
+CMakeFiles/
 
-# -------------------------
-# Compiled Object files / Libraries / Executables
-# -------------------------
-*.o
-*.obj
-*.lo
-*.slo
-*.so
-*.dylib
-*.dll
-*.a
-*.lib
-*.lai
-*.la
-*.pch
-*.gch
+# External libraries
+external/
+build/
 
-*.exe
-*.out
-*.app
-
-# Debug / temp
-*.pdb
-*.dwo
-*.idb
-*.opendb
-*.log
-*.tmp
-*.bak
-
-# -------------------------
-# Editor / IDE
-# -------------------------
-# Visual Studio
-.vs/
-*.vcxproj*
-*.user
-*.sdf
-*.ipch
-
-# CLion
+# IDE / editor configs
 .idea/
-*.iml
-cmake-build-*/
+.vscode/
 
-# Xcode
-*.xcworkspace/
-*.xcuserstate
-*.xcuserdatad
 
-# -------------------------
-# OS-specific files
-# -------------------------
-# macOS
+# OS-specific
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# Linux
-*~
-
-# Windows
 Thumbs.db
 Desktop.ini
-
-# -------------------------
-# Optional external libraries
-# Ignore downloaded external libraries if you re-download them
-# Comment these lines if you actually want to commit them
-external/glad/
-external/glfw/
-external/imgui/
-external/stb/
