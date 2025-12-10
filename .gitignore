@@ -2,6 +2,11 @@
 build/
 bin/
 CMakeFiles/
+/build/
+/bin/
+/obj/
+*.o
+*.exe
 
 # External libraries
 external/
