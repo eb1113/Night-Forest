@@ -1,0 +1,39 @@
+# Book_laying_flat.obj
+# Width (x): 2, Thickness (y): 0.3, Depth (z): 1
+# Spine along back (y axis)
+
+# Vertices (x, y, z)
+v -1.0 0.0 -0.5   # bottom-left-back
+v  1.0 0.0 -0.5   # bottom-right-back
+v  1.0 0.0  0.5   # bottom-right-front
+v -1.0 0.0  0.5   # bottom-left-front
+
+v -1.0 0.3 -0.5   # top-left-back (spine side)
+v  1.0 0.3 -0.5   # top-right-back
+v  1.0 0.3  0.5   # top-right-front
+v -1.0 0.3  0.5   # top-left-front
+
+# Faces (2 triangles per face)
+# Bottom
+f 1 2 3
+f 3 4 1
+
+# Top
+f 5 8 7
+f 7 6 5
+
+# Back (spine side)
+f 1 5 6
+f 6 2 1
+
+# Front
+f 4 3 7
+f 7 8 4
+
+# Left side
+f 1 4 8
+f 8 5 1
+
+# Right side
+f 2 6 7
+f 7 3 2

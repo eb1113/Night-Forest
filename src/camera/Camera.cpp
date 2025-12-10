@@ -20,7 +20,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction){
     fprintf(stdout, "pitch: %f, yaw: %f\n", pitch, yaw);
 
     //set speed
-    speed = 3;
+    speed = 0.25;
     sensitivity = 0.02;
 
     //create projection variables
@@ -44,7 +44,7 @@ Camera::Camera(glm::vec3 position, float yaw, float pitch, float roll){
     this ->roll = 0;
 
     //set speed
-    speed = 3;
+    speed = 0.25;
     sensitivity = 0.02;
 
     //create projection variables
@@ -69,7 +69,7 @@ Camera::Camera(glm::vec3 position){
 
 
     //set speed
-    speed = 3;
+    speed = 0.25;
     sensitivity = 0.02;
 
     //create projection variables
@@ -92,7 +92,7 @@ Camera::Camera(){
     yaw = 135;
 
     //set speed
-    speed = 3;
+    speed = 0.25;
     sensitivity = 0.02;
 
     //create projection

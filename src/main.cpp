@@ -15,13 +15,13 @@ std::string loadShaderFile(const std::string& path)
 
 int main() {
 
-    Window window(800, 600, "Night Forest");
+    Window window(1500, 1000, "Night Forest");
     if(!window.isOpen()){
         return -1;
     }
 
     Camera camera(
-        glm::vec3(1.0f, 1.0f, 5.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
         -90.0f,
         -20.0f,
          0.0f
@@ -71,7 +71,7 @@ int main() {
 
     // load obj file
     ObjLoader loader;
-    if(!loader.load("../models/triangle.obj")){
+    if(!loader.load("../models/rectanglebox.obj")){
         return -1;
     }
 
