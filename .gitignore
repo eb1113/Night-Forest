@@ -1,41 +1,84 @@
-# Prerequisites
-*.d
+# -------------------------
+# Build / CMake
+# -------------------------
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+build/
+bin/
 
-# Compiled Object files
-*.slo
-*.lo
+# -------------------------
+# Compiled Object files / Libraries / Executables
+# -------------------------
 *.o
 *.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
+*.lo
+*.slo
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
 *.lib
+*.lai
+*.la
+*.pch
+*.gch
 
-# Executables
 *.exe
 *.out
 *.app
 
-# debug information files
+# Debug / temp
+*.pdb
 *.dwo
+*.idb
+*.opendb
+*.log
+*.tmp
+*.bak
+
+# -------------------------
+# Editor / IDE
+# -------------------------
+# Visual Studio
+.vs/
+*.vcxproj*
+*.user
+*.sdf
+*.ipch
+
+# CLion
+.idea/
+*.iml
+cmake-build-*/
+
+# Xcode
+*.xcworkspace/
+*.xcuserstate
+*.xcuserdatad
+
+# -------------------------
+# OS-specific files
+# -------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# -------------------------
+# Optional external libraries
+# Ignore downloaded external libraries if you re-download them
+# Comment these lines if you actually want to commit them
+external/glad/
+external/glfw/
+external/imgui/
+external/stb/
