@@ -16,54 +16,45 @@ TileMap::~TileMap() {
     glDeleteBuffers(1, &EBO);
 }
 
-void TileMap::generateGrid(int width, int depth, float tileSize){
+void TileMap::generateGrid(int width, int depth, float tileSize) {
     gridWidth = width;
     gridDepth = depth;
     this->tileSize = tileSize;
-    //generate vertices and indices procedurally
-    for(int x = 0; x < gridWidth; x++){
-        for(int y = 0; y < gridDepth; y++){
-            float x1 = x * tileSize;
-            float z1 = y * tileSize;
-            float x2 = x1 + tileSize;
-            float z2 = z1 + tileSize;
 
-            // Add vertices
-            vertices.push_back(x1);
-            vertices.push_back(0.0f);
-            vertices.push_back(z1);
-            vertices.push_back(0.0f);
-            vertices.push_back(0.0f);
+    vertices.clear();
+    indices.clear();
 
-            vertices.push_back(x2);
-            vertices.push_back(0.0f);
-            vertices.push_back(z1);
-            vertices.push_back(1.0f);
-            vertices.push_back(0.0f);
+    float scale = 0.05f;      // controls frequency of terrain
+    float amplitude = 5.0f;  // max height of terrain
 
-            vertices.push_back(x2);
-            vertices.push_back(0.0f);
-            vertices.push_back(z2);
-            vertices.push_back(1.0f);
-            vertices.push_back(1.0f);
+    for (int x = 0; x < gridWidth; x++) {
+        for (int z = 0; z < gridDepth; z++) {
+            // Compute world coordinates
+            float x0 = x * tileSize;
+            float z0 = z * tileSize;
+            float x1 = x0 + tileSize;
+            float z1 = z0 + tileSize;
 
-            vertices.push_back(x1);
-            vertices.push_back(0.0f);
-            vertices.push_back(z2);
-            vertices.push_back(0.0f);
-            vertices.push_back(1.0f);
+            // Sample Perlin noise for each corner
+            float h00 = PerlinNoise::perlin(x0 * scale, z0 * scale) * amplitude;
+            float h10 = PerlinNoise::perlin(x1 * scale, z0 * scale) * amplitude;
+            float h11 = PerlinNoise::perlin(x1 * scale, z1 * scale) * amplitude;
+            float h01 = PerlinNoise::perlin(x0 * scale, z1 * scale) * amplitude;
 
-            // Add indices
-            unsigned int baseIndex = x * gridDepth * 4 + y * 4;
-            indices.push_back(baseIndex);
-            indices.push_back(baseIndex + 1);
-            indices.push_back(baseIndex + 2);
-            indices.push_back(baseIndex + 2);
-            indices.push_back(baseIndex + 3);
-            indices.push_back(baseIndex);
+            // Add vertices (x, y, z, u, v)
+            vertices.insert(vertices.end(), { x0, h00, z0, 0.0f, 0.0f });
+            vertices.insert(vertices.end(), { x1, h10, z0, 1.0f, 0.0f });
+            vertices.insert(vertices.end(), { x1, h11, z1, 1.0f, 1.0f });
+            vertices.insert(vertices.end(), { x0, h01, z1, 0.0f, 1.0f });
+
+            // Compute indices for two triangles
+            unsigned int baseIndex = x * gridDepth * 4 + z * 4;
+            indices.insert(indices.end(), {
+                baseIndex, baseIndex + 1, baseIndex + 2,
+                baseIndex + 2, baseIndex + 3, baseIndex
+            });
         }
     }
-
 }
 void TileMap::setupBuffers() {
     // Set up VAO, VBO, EBO

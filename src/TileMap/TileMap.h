@@ -3,6 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
+#include "PerlinNoise.hpp"
 
 class TileMap {
     public:

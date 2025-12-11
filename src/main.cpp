@@ -7,18 +7,22 @@ int main() {
     if(!window.isOpen()){
         return -1;
     }
+    // glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     //shaders
-    Shader shader("../src/shaders/triangle.vert", "../src/shaders/triangle.frag");
+    Shader shader("../src/shaders/terrain.vert", "../src/shaders/terrain.frag");
     Camera camera(
         glm::vec3(0.0f, 1.8f, 5.0f),
-        -90.0f,
+        -360.0f,
         -0.0f,
          45.0f
     );
+    // double mx, my;
+    // glfwGetCursorPos(window.getGLFWwindow(), &mx, &my);
+    // camera.initMousePos(mx,my);
     glEnable(GL_DEPTH_TEST);
     float lastTime = glfwGetTime();
     TileMap tileMap;
-    tileMap.generateGrid(100,100,1.0f);
+    tileMap.generateGrid(150,150,1.0f);
     tileMap.setupBuffers();
 
     // load obj file

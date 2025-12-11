@@ -19,6 +19,7 @@ add_executable(nightforest
     src/camera/EulerAngle.cpp
     src/shaders/Shader.cpp
     src/TileMap/TileMap.cpp
+    src/TileMap/PerlinNoise.cpp
 )
 
 # Includes

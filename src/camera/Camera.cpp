@@ -134,11 +134,12 @@ void Camera::calculateViewMatrix(const Window& window) {
 
     // Movement
     glm::vec3 right = glm::normalize(glm::cross(direction, glm::vec3(0,1,0)));
+    glm::vec3 flatforward = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
 
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_W) == GLFW_PRESS)
-        position += direction * speed;
+        position += flatforward * speed;
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_S) == GLFW_PRESS)
-        position -= direction * speed;
+        position -= flatforward * speed;
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_A) == GLFW_PRESS)
         position -= right * speed;
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_D) == GLFW_PRESS)
@@ -173,4 +174,10 @@ glm::mat4 Camera::getProjectionMatrix(){
 //set the fov 
 void Camera::setFOV(int fov){
     this->fov = fov;
+}
+
+//initalize mouse position
+void Camera::initMousePos(double x, double y){
+    xPos = x;
+    yPos = y;
 }

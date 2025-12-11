@@ -22,6 +22,7 @@ class Camera {
         glm::mat4 getViewMatrix();
         glm::mat4 getProjectionMatrix();
         void setFOV(int);
+        void initMousePos(double, double);
         
     private:
         glm::mat4 view;
