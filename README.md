@@ -131,12 +131,6 @@ make
 
 ---
 
-## Contributing
-
-This project is primarily for learning and experimentation, but feedback and ideas are welcome. Feel free to open issues or forks.
-
----
-
 
 ## Author
 
