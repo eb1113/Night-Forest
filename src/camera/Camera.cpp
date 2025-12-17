@@ -106,7 +106,7 @@ Camera::~Camera(){
 }
 
 //calculate the view matrix with mouse position
-void Camera::calculateViewMatrix(const Window& window) {
+void Camera::calculateViewMatrix(const Window& window, const TileMap& tileMap) {
 
     double mouseX, mouseY;
     glfwGetCursorPos(window.getGLFWwindow(), &mouseX, &mouseY);
@@ -145,6 +145,13 @@ void Camera::calculateViewMatrix(const Window& window) {
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_D) == GLFW_PRESS)
         position += right * speed;
 
+    //terrian following
+    float terrainHeight = tileMap.getHeightAt(position.x, position.z);
+    float eyerHeight = 1.8f; //eye level height
+
+    if(position.y < terrainHeight + eyerHeight){
+        position.y = terrainHeight + eyerHeight;
+    }
     // Build view matrix
     view = glm::lookAt(position, position + direction, glm::vec3(0,1,0));
 }

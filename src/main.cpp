@@ -25,7 +25,7 @@ int main() {
     tileMap.generateGrid(150,150,1.0f);
     tileMap.setupBuffers();
 
-    // load obj file
+    // load obj file but not doing anythign with this right now
     ObjLoader loader;
     if(!loader.load("../models/rectanglebox.obj")){
         return -1;
@@ -42,7 +42,7 @@ int main() {
         lastTime = currentTime;
 
         camera.calculateProjectionMatrix(window);
-        camera.calculateViewMatrix(window);
+        camera.calculateViewMatrix(window, tileMap);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();

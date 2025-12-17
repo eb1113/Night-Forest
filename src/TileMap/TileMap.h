@@ -13,6 +13,7 @@ class TileMap {
         void generateGrid(int width, int depth, float tileSize);
         void draw();
         void setupBuffers();
+        float getHeightAt(float x, float z) const;
 
     private:
         std::vector<float> vertices;
@@ -22,6 +23,8 @@ class TileMap {
 
         int gridWidth, gridDepth;
         float tileSize;
+
+        std::vector<std::vector<float>> heights;
 
 };
 #endif

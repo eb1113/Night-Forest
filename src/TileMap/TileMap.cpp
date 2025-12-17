@@ -21,6 +21,10 @@ void TileMap::generateGrid(int width, int depth, float tileSize) {
     gridDepth = depth;
     this->tileSize = tileSize;
 
+    //worrying about heights
+    heights.clear();
+    heights.resize(gridWidth+1, std::vector<float>(gridDepth+1));
+
     vertices.clear();
     indices.clear();
 
@@ -40,6 +44,12 @@ void TileMap::generateGrid(int width, int depth, float tileSize) {
             float h10 = PerlinNoise::perlin(x1 * scale, z0 * scale) * amplitude;
             float h11 = PerlinNoise::perlin(x1 * scale, z1 * scale) * amplitude;
             float h01 = PerlinNoise::perlin(x0 * scale, z1 * scale) * amplitude;
+
+            // store heights
+            heights[x][z] = h00;
+            heights[x+1][z] = h10;
+            heights[x+1][z+1] = h11;
+            heights[x][z+1] = h01;
 
             // Add vertices (x, y, z, u, v)
             vertices.insert(vertices.end(), { x0, h00, z0, 0.0f, 0.0f });
@@ -83,4 +93,34 @@ void TileMap::draw(){
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+float TileMap::getHeightAt(float x, float z) const{
+    float fx = x / tileSize;
+    float fz = z / tileSize;
+
+    int x0 = (int)floor(fx);
+    int z0 = (int)floor(fz);
+
+    int x1 = x0 + 1;
+    int z1 = z0 + 1;
+
+    //clamp to terrain bounds
+    x0 = glm::clamp(x0, 0, gridWidth);
+    x1 = glm::clamp(x1, 0, gridWidth);
+    z0 = glm::clamp(z0, 0, gridDepth);
+    z1 = glm::clamp(x1, 0, gridDepth);
+
+    float sx = fx - x0;
+    float sz = fz - z0;
+
+    float h00 = heights[x0][z0];
+    float h10 = heights[x1][z0];
+    float h01 = heights[x0][z1];
+    float h11 = heights[x1][z1];
+
+    float h0 = glm::mix(h00,h10,sx);
+    float h1 = glm::mix(h01,h11,sx);
+
+    return glm::mix(h0,h1,sz);
+
 }

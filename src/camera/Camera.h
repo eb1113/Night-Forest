@@ -3,6 +3,7 @@
 
 #include "EulerAngle.h"
 #include "../Window.h"
+#include "../TileMap/TileMap.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -17,7 +18,7 @@ class Camera {
         Camera(glm::vec3);
         Camera();
         ~Camera();
-        void calculateViewMatrix(const Window& window);
+        void calculateViewMatrix(const Window& window, const TileMap& tileMap);
         void calculateProjectionMatrix(const Window& window);
         glm::mat4 getViewMatrix();
         glm::mat4 getProjectionMatrix();
