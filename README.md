@@ -83,7 +83,7 @@ make
 
 ---
 
-## 🎮 Controls (Temporary)
+## Controls (Temporary)
 
 | Action        | Key   |
 | ------------- | ----- |
@@ -141,3 +141,4 @@ Computer Science (Graphics / Systems)
 ---
 
 *Night Forest is a work in progress — expect rough edges, unfinished systems, and lots of experimentation.* 🌙🌲
+
