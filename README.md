@@ -4,7 +4,7 @@
 
 Night Forest is an in-progress graphics engine and exploratory environment built as a capstone-style project. The goal is to experiment with real-time rendering techniques, world interaction, and atmospheric visuals while building core engine systems from the ground up.
 
-> ⚠️ **Status:** Actively under development — many systems are experimental and subject to change.
+> ⚠️ **Status:** Actively under development many systems are experimental and subject to change.
 
 testing testing testing
 ---
