@@ -1,4 +1,4 @@
-#include "PerlinNoise.hpp"
+#include "perlinNoise.hpp"
 #include <cmath>
 
 namespace PerlinNoise {

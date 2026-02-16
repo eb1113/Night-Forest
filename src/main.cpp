@@ -25,6 +25,12 @@ int main() {
     tileMap.generateGrid(150,150,1.0f);
     tileMap.setupBuffers();
 
+    //generate foliage
+    tileMap.generateFoliage(42);
+
+    //debugging
+    std::cout << "Generated " << tileMap.getTrees().size() << " trees and " << tileMap.getShrubs().size() << " shrubs." << std::endl;
+
     // load obj file but not doing anythign with this right now
     ObjLoader loader;
     if(!loader.load("../models/rectanglebox.obj")){

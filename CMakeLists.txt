@@ -13,13 +13,13 @@ target_include_directories(glad PUBLIC external/glad/include)
 # Your executable
 add_executable(nightforest
     src/main.cpp
-    src/ObjLoader.cpp
-    src/Window.cpp
-    src/camera/Camera.cpp
-    src/camera/EulerAngle.cpp
-    src/shaders/Shader.cpp
-    src/TileMap/TileMap.cpp
-    src/TileMap/PerlinNoise.cpp
+    src/objLoader.cpp
+    src/window.cpp
+    src/Camera/camera.cpp
+    src/Camera/eulerAngle.cpp
+    src/Shaders/shader.cpp
+    src/WorldGen/tileMap.cpp
+    src/WorldGen/perlinNoise.cpp
 )
 
 # Includes

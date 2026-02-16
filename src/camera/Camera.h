@@ -1,9 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "EulerAngle.h"
-#include "../Window.h"
-#include "../TileMap/TileMap.h"
+#include "eulerAngle.h"
+#include "../window.h"
+#include "../WorldGen/tileMap.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>

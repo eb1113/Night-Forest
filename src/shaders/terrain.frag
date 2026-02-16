@@ -3,15 +3,24 @@ in float vHeight;
 out vec4 fragColor;
 
 void main() {
-    //green
+    // darker base colors
+    vec3 dirt  = vec3(0.25, 0.20, 0.10);  // dark brown
+    vec3 grass = vec3(0.05, 0.40, 0.05);  // deep green
+    vec3 rock  = vec3(0.3, 0.3, 0.3);     // dark gray
+
+    // match your TileMap amplitude
+    float maxHeight = 1.5;
+    float dirtLimit  = maxHeight * 0.33;
+    float grassLimit = maxHeight * 0.66;
+
     vec3 color;
 
-    if(vHeight < 1.0)
-        color = vec3(0.4,0.3,0.1); //dirt
-    else if(vHeight < 2.0)
-        color = vec3(0.1,0.6,0.1); //grass
+    if(vHeight < dirtLimit)
+        color = dirt;
+    else if(vHeight < grassLimit)
+        color = mix(dirt, grass, (vHeight - dirtLimit)/(grassLimit - dirtLimit));
     else
-        color = vec3(0.5,0.5,0.5); //gray rock
+        color = mix(grass, rock, (vHeight - grassLimit)/(maxHeight - grassLimit));
 
     fragColor = vec4(color, 1.0);
 }

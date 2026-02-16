@@ -7,8 +7,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "ObjLoader.h"
-#include "Window.h"
-#include "camera/Camera.h"
-#include "TileMap/TileMap.h"
-#include "shaders/Shader.h"
+#include "objLoader.h"
+#include "window.h"
+#include "Camera/camera.h"
+#include "WorldGen/tileMap.h"
+#include "Shaders/shader.h"

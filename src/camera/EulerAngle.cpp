@@ -1,4 +1,4 @@
-#include "EulerAngle.h"
+#include "eulerAngle.h"
 #include <stdio.h>
 
 EulerAngle::EulerAngle(float yaw, float pitch, float roll) {
