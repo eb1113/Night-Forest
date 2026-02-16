@@ -93,7 +93,7 @@ make
 | Strafe Right  | D     |
 | Look Around   | Mouse |
 
-*(Bindings may change.)*
+
 
 ---
 
@@ -140,5 +140,5 @@ Computer Science (Graphics / Systems)
 
 ---
 
-*Night Forest is a work in progress — expect rough edges, unfinished systems, and lots of experimentation.* 🌙🌲
+*Night Forest is a work in progress expect rough edges, unfinished systems, and lots of experimentation.* 🌙🌲
 
