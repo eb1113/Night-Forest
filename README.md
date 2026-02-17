@@ -93,7 +93,7 @@ make
 | Strafe Right  | D     |
 | Look Around   | Mouse |
 
-
+> wanting to add a q and e to move on a diagonal
 
 ---
 
@@ -141,4 +141,5 @@ Computer Science (Graphics / Systems)
 ---
 
 *Night Forest is a work in progress expect rough edges, unfinished systems, and lots of experimentation.* 🌙🌲
+
 
