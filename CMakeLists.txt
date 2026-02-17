@@ -19,6 +19,7 @@ add_executable(nightforest
     src/Camera/eulerAngle.cpp
     src/Shaders/shader.cpp
     src/WorldGen/tileMap.cpp
+    src/WorldGen/foliageSystem.cpp
     src/WorldGen/perlinNoise.cpp
 )
 
