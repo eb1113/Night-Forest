@@ -21,6 +21,7 @@ add_executable(nightforest
     src/WorldGen/tileMap.cpp
     src/WorldGen/foliageSystem.cpp
     src/WorldGen/perlinNoise.cpp
+    src/mesh.cpp
 )
 
 # Includes

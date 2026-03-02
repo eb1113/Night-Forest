@@ -1,39 +1,33 @@
-#ifndef TILEMAP_H
-#define TILEMAP_H
+#pragma once
 #include <vector>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
-#include "PerlinNoise.hpp"
-#include "foliageSystem.h"
+#include "foliageSystem.h"  // <-- contains TreeInstance and ShrubInstance
 
 class TileMap {
-    public:
-        TileMap();
-        ~TileMap();
+public:
+    TileMap();
+    ~TileMap();
 
-        void generateGrid(int width, int depth, float tileSize);
-        void draw();
-        void setupBuffers();
-        float getHeightAt(float x, float z) const;
+    void generateGrid(int width, int depth, float tileSize);
+    void setupBuffers();
+    void draw() const;
+    float getHeightAt(float x, float z) const;
 
-        // For foliage
-        void generateFoliage(int seed);
-        const std::vector<TreeInstance>& getTrees() const {return trees;}
-        const std::vector<ShrubInstance>& getShrubs() const {return shrubs;}
+    void generateFoliage(int seed, int numTreeTypes); // number of tree types passed from main
 
-    private:
-        std::vector<float> vertices;
-        std::vector<unsigned int> indices;
+    const std::vector<TreeInstance>& getTrees() const { return trees; }
+    const std::vector<ShrubInstance>& getShrubs() const { return shrubs; }
 
-        unsigned int VAO, VBO, EBO;
+private:
+    std::vector<float> vertices;      // x,y,z,u,v
+    std::vector<unsigned int> indices;
+    std::vector<std::vector<float>> heights;
 
-        int gridWidth, gridDepth;
-        float tileSize;
+    GLuint VAO, VBO, EBO;
+    int gridWidth, gridDepth;
+    float tileSize;
 
-        std::vector<std::vector<float>> heights;
-        std::vector<TreeInstance> trees;
-        std::vector<ShrubInstance> shrubs;
-        bool foliageGenerated = false;
-
+    std::vector<TreeInstance> trees;      // <-- store tree instances
+    std::vector<ShrubInstance> shrubs;    // <-- store shrub instances
 };
-#endif

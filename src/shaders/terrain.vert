@@ -2,6 +2,7 @@
 layout (location = 0) in vec3 aPos;
 layout(location = 1) in vec2 aTex; //texture coordinates
 
+
 out float vHeight; //send height to fragment shader
 
 uniform mat4 model;

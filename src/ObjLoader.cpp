@@ -1,44 +1,58 @@
-#include "objLoader.h"
+#include "ObjLoader.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
-bool ObjLoader::load(const std::string& path)
-{
-    vertices.clear();
-    indices.clear();
+ObjLoader::ObjLoader(const std::string& p) : path(p) {}
+
+bool ObjLoader::load() {
     std::ifstream file(path);
-    if(!file.is_open()){
-        std::cerr << "Failed to open OBJ file: " << path << std::endl;
+    if (!file.is_open()) {
+        std::cerr << "Failed to open OBJ: " << path << std::endl;
         return false;
     }
 
-    std::vector<glm::vec3> tempVerts;
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> texCoords;
+
     std::string line;
-    while(std::getline(file, line)){
-        std::istringstream ss(line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
         std::string type;
         ss >> type;
 
-        if(type == "v"){
-            float x, y, z;
-            ss >> x >> y >> z;
-            tempVerts.push_back(glm::vec3(x, y, z));
-        } else if(type == "f"){
-            unsigned int a, b, c;
-            ss >> a >> b >> c;
-            indices.push_back(a - 1); // OBJ is 1-indexed
-            indices.push_back(b - 1);
-            indices.push_back(c - 1);
+        if (type == "v") {
+            glm::vec3 pos;
+            ss >> pos.x >> pos.y >> pos.z;
+            positions.push_back(pos);
+        } else if (type == "vn") {
+            glm::vec3 n;
+            ss >> n.x >> n.y >> n.z;
+            normals.push_back(n);
+        } else if (type == "vt") {
+            glm::vec2 t;
+            ss >> t.x >> t.y;
+            texCoords.push_back(t);
+        } else if (type == "f") {
+            std::string vertexStr;
+            while (ss >> vertexStr) {
+                std::stringstream vs(vertexStr);
+                std::string posIdx, texIdx, normIdx;
+                getline(vs, posIdx, '/');
+                getline(vs, texIdx, '/');
+                getline(vs, normIdx, '/');
+
+                Vertex v;
+                v.position = positions[std::stoi(posIdx) - 1];
+                v.texCoord = texIdx.empty() ? glm::vec2(0.0f) : texCoords[std::stoi(texIdx) - 1];
+                v.normal   = normIdx.empty() ? glm::vec3(0.0f, 1.0f, 0.0f) : normals[std::stoi(normIdx) - 1];
+
+                vertices.push_back(v);
+                indices.push_back(vertices.size() - 1);
+            }
         }
     }
 
-    // Flatten vertices into float array
-    for(const auto& v : tempVerts){
-        vertices.push_back(v.x);
-        vertices.push_back(v.y);
-        vertices.push_back(v.z);
-    }
-
-    return true;
+    return !vertices.empty();
 }

@@ -1,22 +1,17 @@
-#ifndef OBJLOADER_H
-#define OBJLOADER_H
-
-#include <vector>
+#pragma once
 #include <string>
-#include <glm/glm.hpp>
+#include <vector>
+#include "Vertex.h"
 
 class ObjLoader {
-private:
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
-
 public:
-    ObjLoader() = default;
-
-    bool load(const std::string& path);
-
-    const std::vector<float>& getVertices() const { return vertices; }
+    ObjLoader(const std::string& path);
+    bool load();
+    const std::vector<Vertex>& getVertices() const { return vertices; }
     const std::vector<unsigned int>& getIndices() const { return indices; }
-};
 
-#endif
+private:
+    std::string path;
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+};

@@ -1,65 +1,94 @@
-#include "main.h"
 
+#include "main.h"
+#include <iostream>
+#include <ctime>
 
 int main() {
-
+    //window set up 
     Window window(1500, 1000, "Night Forest");
-    if(!window.isOpen()){
-        return -1;
-    }
-    // glfwSetInputMode(window.getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    //shaders
-    Shader shader("../src/shaders/terrain.vert", "../src/shaders/terrain.frag");
-    Camera camera(
-        glm::vec3(0.0f, 1.8f, 5.0f),
-        -360.0f,
-        -0.0f,
-         45.0f
-    );
-    // double mx, my;
-    // glfwGetCursorPos(window.getGLFWwindow(), &mx, &my);
-    // camera.initMousePos(mx,my);
+    if (!window.isOpen()) return -1;
+
     glEnable(GL_DEPTH_TEST);
-    float lastTime = glfwGetTime();
+    glClearColor(0.05f, 0.05f, 0.1f, 1.0f); 
+
+    //shader
+    Shader terrainShader("../src/shaders/terrain.vert", "../src/shaders/terrain.frag");
+    Shader treeShader("../src/shaders/tree.vert", "../src/shaders/tree.frag");
+
+
+    Camera camera(glm::vec3(0.0f, 1.8f, 5.0f), 0.0f, 0.0f, 45.0f);
+
+    //terrian start of world build :)
     TileMap tileMap;
-    tileMap.generateGrid(150,150,1.0f);
+    tileMap.generateGrid(150, 150, 1.0f);
     tileMap.setupBuffers();
 
-    //generate foliage
-    tileMap.generateFoliage(42);
+    //folliage hope this works 
+    int seed = static_cast<int>(time(nullptr));
+    tileMap.generateFoliage(seed, 1); // 1 type of tree
 
-    //debugging
-    std::cout << "Generated " << tileMap.getTrees().size() << " trees and " << tileMap.getShrubs().size() << " shrubs." << std::endl;
+    std::cout << "Generated " 
+              << tileMap.getTrees().size() 
+              << " trees and " 
+              << tileMap.getShrubs().size() 
+              << " shrubs." << std::endl;
 
-    // load obj file but not doing anythign with this right now
-    ObjLoader loader;
-    if(!loader.load("../models/rectanglebox.obj")){
+    //load tree model
+    ObjLoader loader("../models/treesimple.obj");
+    if (!loader.load()) {
+        std::cerr << "Failed to load tree OBJ" << std::endl;
         return -1;
     }
 
-    std::vector<float> vertices = loader.getVertices();
-    std::vector<unsigned int> indices = loader.getIndices();
+    //create mesh from loaded model
+    Mesh treeMesh(loader.getVertices(), loader.getIndices());
 
+    // build instance data
+    std::vector<TreeInstanceData> instanceData;
+    instanceData.reserve(tileMap.getTrees().size());
 
-    // Main render loop
-    while(window.isOpen()){
-        float currentTime = glfwGetTime();
-        float deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+    for (const TreeInstance& t : tileMap.getTrees()) {
+        instanceData.push_back({t.position, t.rotation, t.scale});
+    }
 
-        camera.calculateProjectionMatrix(window);
-        camera.calculateViewMatrix(window, tileMap);
+    unsigned int instanceVBO;
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, instanceData.size() * sizeof(TreeInstanceData), instanceData.data(), GL_STATIC_DRAW);
+
+    //attach instance buffer to tree mesh
+    treeMesh.addInstanceBuffer(instanceVBO);
+
+    //rendering loop 
+    while (window.isOpen()) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
-        glm::mat4 model = glm::mat4(1.0f);
-        shader.setMat4("model", model);
-        shader.setMat4("view", camera.getViewMatrix());
-        shader.setMat4("projection", camera.getProjectionMatrix());
+        //update the camera 
+        camera.calculateProjectionMatrix(window);
+        camera.calculateViewMatrix(window, tileMap);
 
+        //rendering terrain 
+        terrainShader.use();
+        terrainShader.setMat4("model", glm::mat4(1.0f));
+        terrainShader.setMat4("view", camera.getViewMatrix());
+        terrainShader.setMat4("projection", camera.getProjectionMatrix());
         tileMap.draw();
+
+        //trees!!
+        treeShader.use();
+        treeShader.setMat4("view", camera.getViewMatrix());
+        treeShader.setMat4("projection", camera.getProjectionMatrix());
+
+        glBindVertexArray(treeMesh.VAO);
+        glDrawElementsInstanced(GL_TRIANGLES, treeMesh.indices.size(), GL_UNSIGNED_INT, 0, instanceData.size());
+        glBindVertexArray(0);
+
+
+        
         window.swapBuffers();
         window.pollEvents();
     }
+
+    glfwTerminate();
     return 0;
 }

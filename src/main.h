@@ -12,3 +12,11 @@
 #include "Camera/camera.h"
 #include "WorldGen/tileMap.h"
 #include "Shaders/shader.h"
+#include <unordered_map>
+#include "Mesh.h"
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include "WorldGen/foliageSystem.h"
+
+
