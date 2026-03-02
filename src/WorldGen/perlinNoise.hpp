@@ -10,4 +10,4 @@ namespace PerlinNoise {
 
 } 
 
-#endif // PERLIN_NOISE_HPP
+#endif 

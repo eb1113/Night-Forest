@@ -36,7 +36,7 @@ namespace PerlinNoise {
         float interpolate(float a0, float a1, float w) {
             return (a1 - a0) * (3.0f - 2.0f * w) * w * w + a0;
         }
-    } // anonymous namespace
+    } 
 
     
     float perlin(float x, float y) {
@@ -59,4 +59,4 @@ namespace PerlinNoise {
         return interpolate(ix0, ix1, sy);
     }
 
-} // namespace PerlinNoise
+} 

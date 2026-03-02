@@ -2,7 +2,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
-#include "foliageSystem.h"  // <-- contains TreeInstance and ShrubInstance
+#include "foliageSystem.h" 
 
 class TileMap {
 public:
@@ -28,6 +28,6 @@ private:
     int gridWidth, gridDepth;
     float tileSize;
 
-    std::vector<TreeInstance> trees;      // <-- store tree instances
-    std::vector<ShrubInstance> shrubs;    // <-- store shrub instances
+    std::vector<TreeInstance> trees;     
+    std::vector<ShrubInstance> shrubs;    
 };
