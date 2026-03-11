@@ -67,7 +67,6 @@ Camera::Camera(glm::vec3 position){
     pitch = 0;
     yaw = 90;
 
-
     //set speed
     speed = 0.25;
     sensitivity = 0.02;
@@ -187,4 +186,8 @@ void Camera::setFOV(int fov){
 void Camera::initMousePos(double x, double y){
     xPos = x;
     yPos = y;
+}
+
+glm::vec3 Camera::getPosition() {
+    return position;
 }

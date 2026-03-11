@@ -46,7 +46,7 @@ bool ObjLoader::load() {
                 Vertex v;
                 v.position = positions[std::stoi(posIdx) - 1];
                 v.texCoord = texIdx.empty() ? glm::vec2(0.0f) : texCoords[std::stoi(texIdx) - 1];
-                v.normal   = normIdx.empty() ? glm::vec3(0.0f, 1.0f, 0.0f) : normals[std::stoi(normIdx) - 1];
+                v.normal = glm::vec3(0.0f);
 
                 vertices.push_back(v);
                 indices.push_back(vertices.size() - 1);
@@ -54,5 +54,35 @@ bool ObjLoader::load() {
         }
     }
 
+    if (normals.empty()){
+        //initalize all normals as zero
+
+        for (auto& v : vertices) {
+            v.normal = glm::vec3(0.0f);
+        }
+
+        //face normals
+        for (size_t i = 0; i < indices.size(); i += 3){
+            unsigned int i0 = indices[i];
+            unsigned int i1 = indices[i + 1];
+            unsigned int i2 = indices[i + 2];
+
+            glm::vec3& p0 = vertices[i0].position;
+            glm::vec3& p1 = vertices[i1].position;
+            glm::vec3& p2 = vertices[i2].position;
+
+            glm::vec3 normal = glm::normalize(glm::cross(p1 - p0, p2 - p0));
+
+            vertices[i0].normal += normal;
+            vertices[i1].normal += normal;
+            vertices[i2].normal += normal;
+        }
+        //normalize normals
+        for (auto& v : vertices){
+            v.normal = glm::normalize(v.normal);
+        }
+
+
+    }
     return !vertices.empty();
 }

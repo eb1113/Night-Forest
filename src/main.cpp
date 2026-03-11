@@ -40,6 +40,13 @@ int main() {
         return -1;
     }
 
+    //debugging for normals
+    for (int i = 0; i < 10; i++) {
+    std::cout << "Normal " << i << ": "
+              << loader.getVertices()[i].normal.x << ", "
+              << loader.getVertices()[i].normal.y << ", "
+              << loader.getVertices()[i].normal.z << std::endl;
+    }
     //create mesh from loaded model
     Mesh treeMesh(loader.getVertices(), loader.getIndices());
 
@@ -76,6 +83,11 @@ int main() {
 
         //trees!!
         treeShader.use();
+        treeShader.setVec3("lightDir", glm::normalize(glm::vec3(-1.0f,-1.0f, -0.5f)));
+        treeShader.setVec3("lightColor", glm::vec3(1.0f)); //this coulde be an error but lets see
+        treeShader.setVec3("viewPos", camera.getPosition());
+
+
         treeShader.setMat4("view", camera.getViewMatrix());
         treeShader.setMat4("projection", camera.getProjectionMatrix());
 

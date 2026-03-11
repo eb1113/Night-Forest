@@ -11,40 +11,47 @@ layout (location = 5) in float instanceScale;
 uniform mat4 view;
 uniform mat4 projection;
 
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 TexCoord;
+
 mat4 makeTranslation(vec3 t) {
     return mat4(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        t.x, t.y, t.z, 1.0
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        t.x, t.y, t.z, 1
     );
 }
 
 mat4 makeScale(float s) {
     return mat4(
-        s,   0.0, 0.0, 0.0,
-        0.0, s,   0.0, 0.0,
-        0.0, 0.0, s,   0.0,
-        0.0, 0.0, 0.0, 1.0
+        s,0,0,0,
+        0,s,0,0,
+        0,0,s,0,
+        0,0,0,1
     );
 }
 
-mat4 makeRotationY(float angle) {
-    float c = cos(angle);
-    float s = sin(angle);
+mat4 makeRotationY(float a) {
+    float c = cos(a);
+    float s = sin(a);
     return mat4(
-         c, 0.0,  s, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        -s, 0.0,  c, 0.0,
-        0.0, 0.0, 0.0, 1.0
+         c,0,s,0,
+         0,1,0,0,
+        -s,0,c,0,
+         0,0,0,1
     );
 }
 
-void main()
-{
+void main() {
     mat4 model = makeTranslation(instancePos)
                * makeRotationY(instanceRot)
                * makeScale(instanceScale);
 
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = mat3(model) * aNormal;
+    TexCoord = aTex;
+
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 }

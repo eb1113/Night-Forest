@@ -6,13 +6,30 @@ in vec2 TexCoord;
 
 out vec4 FragColor;
 
-uniform vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+uniform sampler2D diffuseTex;
 
-void main()
-{
+uniform vec3 lightDir;     // direction TO the light
+uniform vec3 lightColor;   // usually white
+uniform vec3 viewPos;      // camera position
+
+void main() {
     vec3 norm = normalize(Normal);
-    float diff = max(dot(norm, lightDir), 0.0);
 
-    vec3 baseColor = vec3(0.0, 0.8, 0.0); // green for tree
-    FragColor = vec4(baseColor * diff, 1.0);
+    // Ambient
+    vec3 ambient = 0.2 * lightColor;
+
+    // Diffuse (Lambert)
+    float diff = max(dot(norm, -lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+
+    // Specular (Blinn–Phong)
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 halfwayDir = normalize(-lightDir + viewDir);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), 32.0);
+    vec3 specular = 0.3 * spec * lightColor;
+
+    // Texture
+    vec3 color = texture(diffuseTex, TexCoord).rgb;
+
+    FragColor = vec4((ambient + diffuse + specular) * color, 1.0);
 }
