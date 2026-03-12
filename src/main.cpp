@@ -34,7 +34,7 @@ int main() {
               << " shrubs." << std::endl;
 
     //load tree model
-    ObjLoader loader("../models/treesimple.obj");
+    ObjLoader loader("../models/fig.obj");
     if (!loader.load()) {
         std::cerr << "Failed to load tree OBJ" << std::endl;
         return -1;
@@ -83,11 +83,11 @@ int main() {
 
         //trees!!
         treeShader.use();
-        treeShader.setVec3("lightDir", glm::normalize(glm::vec3(-1.0f,-1.0f, -0.5f)));
+        treeShader.setVec3("lightDir", glm::normalize(glm::vec3(-1.0f,-1.0f, -0.3f)));
         treeShader.setVec3("lightColor", glm::vec3(1.0f)); //this coulde be an error but lets see
         treeShader.setVec3("viewPos", camera.getPosition());
 
-
+        treeShader.setVec3("materialColor", glm::vec3(1.0f,1.0f, 1.0f));
         treeShader.setMat4("view", camera.getViewMatrix());
         treeShader.setMat4("projection", camera.getProjectionMatrix());
 

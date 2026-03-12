@@ -2,7 +2,6 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTex;
 
 layout (location = 3) in vec3 instancePos;
 layout (location = 4) in float instanceRot;
@@ -13,7 +12,6 @@ uniform mat4 projection;
 
 out vec3 FragPos;
 out vec3 Normal;
-out vec2 TexCoord;
 
 mat4 makeTranslation(vec3 t) {
     return mat4(
@@ -45,13 +43,13 @@ mat4 makeRotationY(float a) {
 }
 
 void main() {
-    mat4 model = makeTranslation(instancePos)
-               * makeRotationY(instanceRot)
-               * makeScale(instanceScale);
+    mat4 model =
+        makeTranslation(instancePos) *
+        makeRotationY(instanceRot) *
+        makeScale(instanceScale);
 
     FragPos = vec3(model * vec4(aPos, 1.0));
-    Normal = mat3(model) * aNormal;
-    TexCoord = aTex;
+    Normal  = normalize(mat3(model) * aNormal);
 
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }

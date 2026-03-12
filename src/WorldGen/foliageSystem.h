@@ -35,10 +35,12 @@ class FoliageGenerator {
         static std::vector<FoliageCluster> generateClusters(int gridWidth, int gridDepth, float tileSize, int seed);
         static std::vector<TreeInstance> generateTrees(const FoliageCluster& cluster, std::function<float(float,float)> getHeightFunc, int seed);
         static std::vector<ShrubInstance> generateShrubs(const FoliageCluster& cluster, std::function<float(float,float)> getHeightFunc, int seed);
+        
 
     private:
         template <typename T> 
         static bool isValidPosition(glm::vec3 pos, const std::vector<T>& exsisting, float minDistance);
         static float simpleNoise(float x, float y, int seed);
+        static bool isNearPath(glm::vec3 pos);
 };
 
