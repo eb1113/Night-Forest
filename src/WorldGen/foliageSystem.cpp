@@ -3,9 +3,9 @@
 #include <cmath>
 #include <algorithm>
 
-// ------------------------------------------------------------
+
 // Simple hash-based noise
-// ------------------------------------------------------------
+
 float FoliageGenerator::simpleNoise(float x, float y, int seed) {
     int n = (int)(x * 37461393 + y * 668265263 + seed * 1442695040888963407);
     n = (n << 13) ^ n;
@@ -13,9 +13,9 @@ float FoliageGenerator::simpleNoise(float x, float y, int seed) {
         & 0x7fffffff) / 1073741824.0f);
 }
 
-// ------------------------------------------------------------
+
 // Generate cluster centers
-// ------------------------------------------------------------
+
 std::vector<FoliageCluster> FoliageGenerator::generateClusters(
     int gridWidth, int gridDepth, float tileSize, int seed)
 {
@@ -27,9 +27,9 @@ std::vector<FoliageCluster> FoliageGenerator::generateClusters(
     std::mt19937 rng(seed);
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-    // --------------------------------------------------------
+
     // Tuned for walkable forest
-    // --------------------------------------------------------
+ 
     int clusterSpacing = 50;        // fewer clusters
     float clusterThreshold = 0.8f;  // only strong noise creates clusters
 
@@ -52,7 +52,7 @@ std::vector<FoliageCluster> FoliageGenerator::generateClusters(
 
             // Smaller clusters for walkable forest
             cluster.radius  = 8.0f + noiseValue * 12.0f;
-            cluster.density = noiseValue;
+            cluster.density = noiseValue;// tuned for fewer objects
 
             // Type selection
             float typeNoise =
@@ -72,9 +72,9 @@ std::vector<FoliageCluster> FoliageGenerator::generateClusters(
     return clusters;
 }
 
-// ------------------------------------------------------------
+
 // Check spacing between objects
-// ------------------------------------------------------------
+
 template <typename T>
 bool FoliageGenerator::isValidPosition(glm::vec3 pos,
     const std::vector<T>& existing, float minDistance)
@@ -90,19 +90,11 @@ bool FoliageGenerator::isValidPosition(glm::vec3 pos,
     return true;
 }
 
-// ------------------------------------------------------------
-// Path exclusion helper
-// ------------------------------------------------------------
-bool FoliageGenerator::isNearPath(glm::vec3 pos) {
-    float pathZ = 50.0f;     // example straight path at z = 50
-    float pathWidth = 6.0f;  // walkable width
 
-    return fabs(pos.z - pathZ) < pathWidth;
-}
 
-// ------------------------------------------------------------
+
 // Generate trees inside a cluster
-// ------------------------------------------------------------
+
 std::vector<TreeInstance> FoliageGenerator::generateTrees(
     const FoliageCluster& cluster,
     std::function<float(float, float)> getHeightFunc,
@@ -131,10 +123,6 @@ std::vector<TreeInstance> FoliageGenerator::generateTrees(
         position.z = cluster.center.y + sin(angle) * distance;
         position.y = getHeightFunc(position.x, position.z);
 
-        // Skip trees on the path
-        if (isNearPath(position))
-            continue;
-
         if (isValidPosition(position, trees, minDistance)) {
             TreeInstance tree;
             tree.position = position;
@@ -148,9 +136,8 @@ std::vector<TreeInstance> FoliageGenerator::generateTrees(
     return trees;
 }
 
-// ------------------------------------------------------------
 // Generate shrubs (similar logic)
-// ------------------------------------------------------------
+
 std::vector<ShrubInstance> FoliageGenerator::generateShrubs(
     const FoliageCluster& cluster,
     std::function<float(float, float)> getHeightFunc,
@@ -176,9 +163,6 @@ std::vector<ShrubInstance> FoliageGenerator::generateShrubs(
         position.x = cluster.center.x + cos(angle) * distance;
         position.z = cluster.center.y + sin(angle) * distance;
         position.y = getHeightFunc(position.x, position.z);
-
-        if (isNearPath(position))
-            continue;
 
         if (isValidPosition(position, shrubs, minDistance)) {
             ShrubInstance shrub;

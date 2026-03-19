@@ -16,11 +16,11 @@ int main() {
     Shader treeShader("../src/shaders/tree.vert", "../src/shaders/tree.frag");
 
 
-    Camera camera(glm::vec3(0.0f, 1.8f, 5.0f), 0.0f, 0.0f, 45.0f);
+    Camera camera(glm::vec3(0.0f, 5.0f,50.0f), 0.0f, 0.0f, 20.0f);
 
     //terrian start of world build :)
     TileMap tileMap;
-    tileMap.generateGrid(150, 150, 1.0f);
+    tileMap.generateGrid(300, 300, 1.0f);
     tileMap.setupBuffers();
 
     //folliage hope this works 
@@ -34,7 +34,7 @@ int main() {
               << " shrubs." << std::endl;
 
     //load tree model
-    ObjLoader loader("../models/fig.obj");
+    ObjLoader loader("../models/fir.obj");
     if (!loader.load()) {
         std::cerr << "Failed to load tree OBJ" << std::endl;
         return -1;

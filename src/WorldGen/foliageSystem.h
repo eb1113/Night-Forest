@@ -41,6 +41,5 @@ class FoliageGenerator {
         template <typename T> 
         static bool isValidPosition(glm::vec3 pos, const std::vector<T>& exsisting, float minDistance);
         static float simpleNoise(float x, float y, int seed);
-        static bool isNearPath(glm::vec3 pos);
 };
 

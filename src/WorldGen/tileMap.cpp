@@ -115,7 +115,7 @@ void TileMap::generateFoliage(int seed, int numTreeTypes) {
 
     for (int i = 0; i < gridWidth; ++i) {
         for (int j = 0; j < gridDepth; ++j) {
-            if ((rand()%100) < 5) { // 5% chance for a tree
+            if ((rand()%100) < 2) { //tuning for the trees
                 TreeInstance tree;
                 tree.position = glm::vec3(i*tileSize, getHeightAt(i*tileSize,j*tileSize), j*tileSize);
                 tree.rotation = glm::radians((float)(rand()%360));
