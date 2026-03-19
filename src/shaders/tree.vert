@@ -2,54 +2,55 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoord;
 
 layout (location = 3) in vec3 instancePos;
 layout (location = 4) in float instanceRot;
 layout (location = 5) in float instanceScale;
 
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 TexCoord;
+
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 FragPos;
-out vec3 Normal;
+mat4 makeModel(vec3 pos, float rot, float scaleVal)
+{
+    mat4 model = mat4(1.0);
 
-mat4 makeTranslation(vec3 t) {
-    return mat4(
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        t.x, t.y, t.z, 1
+    // translate
+    model[3] = vec4(pos, 1.0);
+
+    // rotate around Y
+    float c = cos(rot);
+    float s = sin(rot);
+    mat4 rotY = mat4(
+        vec4( c, 0, s, 0 ),
+        vec4( 0, 1, 0, 0 ),
+        vec4(-s, 0, c, 0 ),
+        vec4( 0, 0, 0, 1 )
     );
+
+    // scale
+    mat4 scaleM = mat4(
+        vec4(scaleVal, 0, 0, 0),
+        vec4(0, scaleVal, 0, 0),
+        vec4(0, 0, scaleVal, 0),
+        vec4(0, 0, 0, 1)
+    );
+
+    return model * rotY * scaleM;
 }
 
-mat4 makeScale(float s) {
-    return mat4(
-        s,0,0,0,
-        0,s,0,0,
-        0,0,s,0,
-        0,0,0,1
-    );
-}
+void main()
+{
+    mat4 model = makeModel(instancePos, instanceRot, instanceScale);
 
-mat4 makeRotationY(float a) {
-    float c = cos(a);
-    float s = sin(a);
-    return mat4(
-         c,0,s,0,
-         0,1,0,0,
-        -s,0,c,0,
-         0,0,0,1
-    );
-}
+    vec4 worldPos = model * vec4(aPos, 1.0);
+    gl_Position = projection * view * worldPos;
 
-void main() {
-    mat4 model =
-        makeTranslation(instancePos) *
-        makeRotationY(instanceRot) *
-        makeScale(instanceScale);
-
-    FragPos = vec3(model * vec4(aPos, 1.0));
-    Normal  = normalize(mat3(model) * aNormal);
-
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+    FragPos = vec3(worldPos);
+    Normal = mat3(transpose(inverse(model))) * aNormal;
+    TexCoord = aTexCoord;
 }

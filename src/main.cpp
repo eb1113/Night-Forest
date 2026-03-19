@@ -50,6 +50,9 @@ int main() {
     //create mesh from loaded model
     Mesh treeMesh(loader.getVertices(), loader.getIndices());
 
+    //add in texture
+    Texture treeTexture("../models/branch.png");
+
     // build instance data
     std::vector<TreeInstanceData> instanceData;
     instanceData.reserve(tileMap.getTrees().size());
@@ -87,9 +90,12 @@ int main() {
         treeShader.setVec3("lightColor", glm::vec3(1.0f)); //this coulde be an error but lets see
         treeShader.setVec3("viewPos", camera.getPosition());
 
-        treeShader.setVec3("materialColor", glm::vec3(1.0f,1.0f, 1.0f));
+        treeShader.setMat4("model", glm::mat4(1.0f));
         treeShader.setMat4("view", camera.getViewMatrix());
         treeShader.setMat4("projection", camera.getProjectionMatrix());
+
+        treeTexture.bind(0);
+        treeShader.setInt("treeTexture", 0);
 
         glBindVertexArray(treeMesh.VAO);
         glDrawElementsInstanced(GL_TRIANGLES, treeMesh.indices.size(), GL_UNSIGNED_INT, 0, instanceData.size());
@@ -104,3 +110,4 @@ int main() {
     glfwTerminate();
     return 0;
 }
+
