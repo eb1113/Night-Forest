@@ -191,3 +191,7 @@ void Camera::initMousePos(double x, double y){
 glm::vec3 Camera::getPosition() {
     return position;
 }
+
+glm::vec3 Camera::getFront() {
+    return direction;
+}

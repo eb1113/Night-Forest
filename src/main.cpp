@@ -86,9 +86,18 @@ int main() {
 
         //trees!!
         treeShader.use();
-        treeShader.setVec3("lightDir", glm::normalize(glm::vec3(-1.0f,-1.0f, -0.3f)));
-        treeShader.setVec3("lightColor", glm::vec3(1.0f)); //this coulde be an error but lets see
+        //old logic
+        // glm::vec3 camPos = camera.getPosition();
+        // glm::vec3 lightDir = glm::normalize(camPos - glm::vec3(0.0f)); 
+        // treeShader.setVec3("lightDir", -lightDir);
+        treeShader.setVec3("lightColor", glm::vec3(1.0f));
         treeShader.setVec3("viewPos", camera.getPosition());
+
+        //new logic for flashlight will see if it works
+        treeShader.setVec3("spotPos", camera.getPosition());
+        treeShader.setVec3("spotDir", camera.getFront());
+        treeShader.setFloat("innerCutoff", glm::cos(glm::radians(12.5f)));
+        treeShader.setFloat("outerCutoff", glm::cos(glm::radians(17.5f)));
 
         treeShader.setMat4("model", glm::mat4(1.0f));
         treeShader.setMat4("view", camera.getViewMatrix());

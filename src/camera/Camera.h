@@ -25,6 +25,7 @@ class Camera {
         void setFOV(int);
         void initMousePos(double, double);
         glm::vec3 getPosition();
+        glm::vec3 getFront();
         
     private:
         glm::mat4 view;
