@@ -169,8 +169,8 @@ int main() {
         // Flashlight
         treeShader.setVec3("spotPos", camera.getPosition());
         treeShader.setVec3("spotDir", camera.getFront());
-        treeShader.setFloat("innerCutoff", glm::cos(glm::radians(12.5f)));
-        treeShader.setFloat("outerCutoff", glm::cos(glm::radians(17.5f)));
+        treeShader.setFloat("innerCutoff", glm::cos(glm::radians(20.0f)));
+        treeShader.setFloat("outerCutoff", glm::cos(glm::radians(30.0f)));
 
         treeShader.setMat4("model", glm::mat4(1.0f));
         treeShader.setMat4("view", camera.getViewMatrix());
