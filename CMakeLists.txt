@@ -23,7 +23,7 @@ add_executable(nightforest
     src/WorldGen/perlinNoise.cpp
     src/mesh.cpp
     src/Texture.cpp
-    
+    src/firefly.cpp
 )
 
 # Includes

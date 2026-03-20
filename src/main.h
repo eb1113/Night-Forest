@@ -13,6 +13,7 @@
 #include "WorldGen/tileMap.h"
 #include "Shaders/shader.h"
 #include "Texture.h"
+#include "firefly.h"
 #include "WorldGen/foliageSystem.h"
 #include <unordered_map>
 #include "Mesh.h"

@@ -59,6 +59,95 @@ void TileMap::generateGrid(int width, int depth, float tileSize) {
     }
 }
 
+// void TileMap::generateGrid(int width, int depth, float tileSize) {
+//     gridWidth = width;
+//     gridDepth = depth;
+//     this->tileSize = tileSize;
+
+//     vertices.clear();
+//     indices.clear();
+//     heights.clear();
+//     heights.resize(gridWidth + 1, std::vector<float>(gridDepth + 1, 0.0f));
+
+//     float scale = 0.02f;
+//     float amplitude = 10.0f;
+
+
+//     // Generate heightmap + raw vertices
+//     for (int x = 0; x < gridWidth; ++x) {
+//         for (int z = 0; z < gridDepth; ++z) {
+
+//             float x0 = x * tileSize;
+//             float z0 = z * tileSize;
+//             float x1 = x0 + tileSize;
+//             float z1 = z0 + tileSize;
+
+//             float h00 = PerlinNoise::perlin(x0 * scale, z0 * scale) * amplitude;
+//             float h10 = PerlinNoise::perlin(x1 * scale, z0 * scale) * amplitude;
+//             float h11 = PerlinNoise::perlin(x1 * scale, z1 * scale) * amplitude;
+//             float h01 = PerlinNoise::perlin(x0 * scale, z1 * scale) * amplitude;
+
+//             heights[x][z]     = h00;
+//             heights[x+1][z]   = h10;
+//             heights[x+1][z+1] = h11;
+//             heights[x][z+1]   = h01;
+
+//             vertices.insert(vertices.end(), { x0, h00, z0,  0,0,0,  0.0f, 0.0f });
+//             vertices.insert(vertices.end(), { x1, h10, z0,  0,0,0,  1.0f, 0.0f });
+//             vertices.insert(vertices.end(), { x1, h11, z1,  0,0,0,  1.0f, 1.0f });
+//             vertices.insert(vertices.end(), { x0, h01, z1,  0,0,0,  0.0f, 1.0f });
+
+//             unsigned int baseIndex = (x * gridDepth + z) * 4;
+
+//             indices.insert(indices.end(), {
+//                 baseIndex, baseIndex + 1, baseIndex + 2,
+//                 baseIndex + 2, baseIndex + 3, baseIndex
+//             });
+//         }
+//     }
+
+
+//     // Compute normals
+//     for (int i = 0; i < indices.size(); i += 3) {
+//         unsigned int i0 = indices[i] * 8;
+//         unsigned int i1 = indices[i+1] * 8;
+//         unsigned int i2 = indices[i+2] * 8;
+
+//         glm::vec3 v0(vertices[i0],     vertices[i0+1],     vertices[i0+2]);
+//         glm::vec3 v1(vertices[i1],     vertices[i1+1],     vertices[i1+2]);
+//         glm::vec3 v2(vertices[i2],     vertices[i2+1],     vertices[i2+2]);
+
+//         glm::vec3 e1 = v1 - v0;
+//         glm::vec3 e2 = v2 - v0;
+//         glm::vec3 normal = glm::normalize(glm::cross(e1, e2));
+
+//         // Accumulate
+//         vertices[i0+3] += normal.x;
+//         vertices[i0+4] += normal.y;
+//         vertices[i0+5] += normal.z;
+
+//         vertices[i1+3] += normal.x;
+//         vertices[i1+4] += normal.y;
+//         vertices[i1+5] += normal.z;
+
+//         vertices[i2+3] += normal.x;
+//         vertices[i2+4] += normal.y;
+//         vertices[i2+5] += normal.z;
+//     }
+
+
+//     // Normalize all normals
+//     for (int i = 0; i < vertices.size(); i += 8) {
+//         glm::vec3 n(vertices[i+3], vertices[i+4], vertices[i+5]);
+//         n = glm::normalize(n);
+
+//         vertices[i+3] = n.x;
+//         vertices[i+4] = n.y;
+//         vertices[i+5] = n.z;
+//     }
+// }
+
+
 void TileMap::setupBuffers() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
