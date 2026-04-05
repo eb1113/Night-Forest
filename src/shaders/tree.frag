@@ -37,7 +37,7 @@ void main()
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 32.0);
 
     vec3 ambientLight  = 0.15 * lightColor;
-    vec3 diffuseLight  = diff * lightColor;
+    vec3 diffuseLight  = diff * lightColor * .1;
     vec3 specularLight = 0.3 * spec * lightColor;
 
     // FLASHLIGHT 
