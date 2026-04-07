@@ -4,7 +4,7 @@
 
 int main() {
     // Window setup
-    Window window(1500, 1000, "Night Forest");
+    Window window(2000, 1500, "Night Forest");
     if (!window.isOpen()) return -1;
 
     glEnable(GL_DEPTH_TEST);
@@ -16,7 +16,7 @@ int main() {
     Shader fireflyShader("../src/shaders/firefly.vert", "../src/shaders/firefly.frag");
 
     // Camera
-    Camera camera(glm::vec3(0.0f, 5.0f, 50.0f), 0.0f, 0.0f, 20.0f);
+    Camera camera(glm::vec3(0.0f, 5.0f, 50.0f), 0.0f, 1.0f, 20.0f);
 
     // Terrain
     TileMap tileMap;
@@ -24,7 +24,7 @@ int main() {
     tileMap.setupBuffers();
 
     // Fireflies
-    FireflySystem fireflySystem(100);
+    FireflySystem fireflySystem(10);
 
     // Foliage
     int seed = static_cast<int>(time(nullptr));
@@ -102,7 +102,6 @@ int main() {
 
     glBindVertexArray(0);
 
-    // Timing
     float lastTime = static_cast<float>(glfwGetTime());
 
     // Render loop
@@ -116,7 +115,7 @@ int main() {
         // Update fireflies
         fireflySystem.update(deltaTime);
 
-        // Update firefly instance positions
+        
         const auto& fireflies = fireflySystem.getFireflies();
         std::vector<glm::vec3> fireflyPositions;
         fireflyPositions.reserve(fireflies.size());
@@ -141,7 +140,7 @@ int main() {
         terrainShader.setMat4("projection", camera.getProjectionMatrix());
         tileMap.draw();
 
-        // Render visible fireflies
+        // Render fireflies
         fireflyShader.use();
         fireflyShader.setMat4("view", camera.getViewMatrix());
         fireflyShader.setMat4("projection", camera.getProjectionMatrix());
@@ -152,7 +151,7 @@ int main() {
         glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, static_cast<GLsizei>(fireflies.size()));
         glBindVertexArray(0);
 
-        // Trees + lighting
+
         treeShader.use();
 
         treeShader.setVec3("lightColor", glm::vec3(1.0f));

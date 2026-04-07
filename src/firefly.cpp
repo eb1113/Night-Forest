@@ -14,6 +14,8 @@ FireflySystem::FireflySystem(int count){
 
         //radius controls
         f.radius = 6.0f;
+
+        fireflies.push_back(f);
     }
 }
 
@@ -30,5 +32,6 @@ void FireflySystem::update(float deltaTime) {
 
         f.vel *= damping;
         f.pos += f.vel * deltaTime;
+
     }
 }

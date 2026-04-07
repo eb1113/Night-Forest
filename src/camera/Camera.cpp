@@ -1,189 +1,224 @@
+
 #include "camera.h"
+#include "../WorldGen/tilemap.h"
+#include <GLFW/glfw3.h>
+#include <algorithm>
+#include <cmath>
 
-Camera::Camera(glm::vec3 position, glm::vec3 direction){
-    //camera direction and position
+Camera::Camera(glm::vec3 position, glm::vec3 direction) {
     this->position = position;
-    this->direction = direction;
-    
-    //create the mouse x and y
-    xPos = 0;
-    yPos = 0;
+    this->direction = glm::normalize(direction);
 
-    //create viewing angles
-    EulerAngle angles = EulerAngle();
-    angles.toAngles(this->direction - this->position);
+    xPos = 0.0;
+    yPos = 0.0;
 
-    this ->pitch = angles.getPitch();
-    this ->yaw = angles.getYaw();
-    this ->roll = 0;
+   
+    pitch = glm::degrees(asin(this->direction.y));
+    yaw   = glm::degrees(atan2(this->direction.z, this->direction.x));
+    roll  = 0.0f;
 
-    fprintf(stdout, "pitch: %f, yaw: %f\n", pitch, yaw);
+    speed       = 0.25f;
+    sensitivity = 0.08f;
 
-    //set speed
-    speed = 0.25;
-    sensitivity = 0.02;
+    fov         = 45.0f;
+    minDistance = 0.1f;
+    maxDistance = 100.0f;
 
-    //create projection variables
-    fov = 45.0;
-    minDistance = 0.1;
-    maxDistance = 100.0;
-    
+    velocity        = glm::vec3(0.0f);
+    acceleration    = 0.06f;
+    damping         = 0.85f;
+    collisionRadius = 0.5f;
 }
-Camera::Camera(glm::vec3 position, float yaw, float pitch, float roll){
-    //camera direction and position
-    direction = glm::vec3(0,0,0);
+
+Camera::Camera(glm::vec3 position, float yaw, float pitch, float roll) {
     this->position = position;
+    this->yaw      = yaw;
+    this->pitch    = pitch;
+    this->roll     = roll;
 
-    //create the mouse x and y
-    xPos = 0;
-    yPos = 0;
+    xPos = 0.0;
+    yPos = 0.0;
 
-    //set viewing angles
-    this ->pitch = pitch;
-    this ->yaw = yaw;
-    this ->roll = 0;
+    speed       = 0.25f;
+    sensitivity = 0.08f;
 
-    //set speed
-    speed = 0.25;
-    sensitivity = 0.02;
+    fov         = 45.0f;
+    minDistance = 0.1f;
+    maxDistance = 100.0f;
 
-    //create projection variables
-    fov = 45.0;
-    minDistance = 0.1;
-    maxDistance = 100.0;
+    velocity        = glm::vec3(0.0f);
+    acceleration    = 0.06f;
+    damping         = 0.85f;
+    collisionRadius = 0.5f;
 
+    direction = glm::normalize(glm::vec3(
+        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+        sin(glm::radians(pitch)),
+        sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+    ));
 }
 
-Camera::Camera(glm::vec3 position){
-    //camera direction and position
-    direction = glm::vec3(0,0,0);
+Camera::Camera(glm::vec3 position) {
     this->position = position;
+    direction      = glm::vec3(0.0f, 0.0f, -1.0f);
 
-    //create the mouse x and y
-    xPos = 0;
-    yPos = 0;
+    xPos = 0.0;
+    yPos = 0.0;
 
-    //create viewing angles
-    pitch = 0;
-    yaw = 90;
+    pitch = 0.0f;
+    yaw   = 90.0f;
+    roll  = 0.0f;
 
-    //set speed
-    speed = 0.25;
-    sensitivity = 0.02;
+    speed       = 0.25f;
+    sensitivity = 0.08f;
 
-    //create projection variables
-    fov = 45.0;
-    minDistance = 0.1;
-    maxDistance = 100.0;
+    fov         = 45.0f;
+    minDistance = 0.1f;
+    maxDistance = 100.0f;
+
+    velocity        = glm::vec3(0.0f);
+    acceleration    = 0.06f;
+    damping         = 0.85f;
+    collisionRadius = 0.5f;
 }
 
-Camera::Camera(){
-    //camer direction and position
-    direction = glm::vec3(0,0,0);
-    position = glm::vec3(0,0,0);
+Camera::Camera() {
+    position = glm::vec3(0.0f);
+    direction = glm::vec3(0.0f, 0.0f, -1.0f);
 
-    //mouse
-    xPos = 0;
-    yPos = 0;
+    xPos = 0.0;
+    yPos = 0.0;
 
-    //viewing angles
-    pitch = 45;
-    yaw = 135;
+    pitch = 45.0f;
+    yaw   = 135.0f;
+    roll  = 0.0f;
 
-    //set speed
-    speed = 0.25;
-    sensitivity = 0.02;
+    speed       = 0.25f;
+    sensitivity = 0.08f;
 
-    //create projection
-    fov = 45.0;
-    minDistance = 0.1;
-    maxDistance = 100.0;
+    fov         = 45.0f;
+    minDistance = 0.1f;
+    maxDistance = 100.0f;
+
+    velocity        = glm::vec3(0.0f);
+    acceleration    = 0.02f;
+    damping         = 0.85f;
+    collisionRadius = 0.5f;
 }
 
-Camera::~Camera(){
+Camera::~Camera() {}
 
+// simple collision against trees in TileMap
+bool Camera::collidesWith(const glm::vec3& newPos, const TileMap& tileMap) {
+    const auto& trees = tileMap.getTrees();
+    for (const auto& t : trees) {
+        float dist = glm::distance(glm::vec2(newPos.x, newPos.z),
+                                   glm::vec2(t.position.x, t.position.z));
+
+        float minDist = collisionRadius + t.scale * 0.5f;
+        if (dist < minDist)
+            return true;
+    }
+    return false;
 }
 
-//calculate the view matrix with mouse position
 void Camera::calculateViewMatrix(const Window& window, const TileMap& tileMap) {
-
     double mouseX, mouseY;
     glfwGetCursorPos(window.getGLFWwindow(), &mouseX, &mouseY);
 
-    // Calculate mouse delta
     double deltaX = mouseX - xPos;
-    double deltaY = yPos - mouseY; // invert Y
+    double deltaY = yPos - mouseY; 
 
     xPos = mouseX;
     yPos = mouseY;
 
-    // Apply to pitch and yaw
-    yaw   += deltaX * sensitivity;
-    pitch += deltaY * sensitivity;
+    yaw   += static_cast<float>(deltaX) * sensitivity;
+    pitch += static_cast<float>(deltaY) * sensitivity;
 
-    // Constrain pitch
-    if (pitch > 89.0f) pitch = 89.0f;
-    if (pitch < -89.0f) pitch = -89.0f;
+    pitch = glm::clamp(pitch, -89.0f, 89.99f);
 
-    // Convert angles to direction vector
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction = glm::normalize(direction);
+    direction = glm::normalize(glm::vec3(
+        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+        sin(glm::radians(pitch)),
+        sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+    ));
 
-    // Movement
-    glm::vec3 right = glm::normalize(glm::cross(direction, glm::vec3(0,1,0)));
+    glm::vec3 right       = glm::normalize(glm::cross(direction, glm::vec3(0,1,0)));
     glm::vec3 flatforward = glm::normalize(glm::vec3(direction.x, 0.0f, direction.z));
 
+    glm::vec3 input(0.0f);
+
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_W) == GLFW_PRESS)
-        position += flatforward * speed;
+        input += flatforward;
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_S) == GLFW_PRESS)
-        position -= flatforward * speed;
+        input -= flatforward;
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_A) == GLFW_PRESS)
-        position -= right * speed;
+        input -= right;
     if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_D) == GLFW_PRESS)
-        position += right * speed;
+        input += right;
 
-    //terrian following
-    float terrainHeight = tileMap.getHeightAt(position.x, position.z);
-    float eyerHeight = 1.8f; //eye level height
+    if (glm::length(input) > 0.0f)
+        input = glm::normalize(input);
 
-    if(position.y < terrainHeight + eyerHeight){
-        position.y = terrainHeight + eyerHeight;
+    // acceleration
+    velocity += input * acceleration;
+
+    // only damp when not pressing movement keys
+    if (glm::length(input) < 0.001f)
+        velocity *= damping;
+
+    // move
+    glm::vec3 newPos = position + velocity;
+
+
+    // terrain follow
+    float terrainHeight = tileMap.getHeightAt(newPos.x, newPos.z);
+    float eyeHeight = 1.8f;
+    if (newPos.y < terrainHeight + eyeHeight)
+        newPos.y = terrainHeight + eyeHeight;
+
+    if (!collidesWith(newPos, tileMap))
+        position = newPos;
+    else
+        velocity = glm::vec3(0.0f);
+
+    // subtle head bob based on speed
+    float speedMag = glm::length(velocity);
+    float bob = 0.0f;
+    if (speedMag > 0.001f) {
+        bob = sin(static_cast<float>(glfwGetTime()) * 10.0f) *
+              0.03f * glm::clamp(speedMag * 5.0f, 0.0f, 1.0f);
     }
-    // Build view matrix
-    view = glm::lookAt(position, position + direction, glm::vec3(0,1,0));
+
+    glm::vec3 camPos = position;
+    camPos.y += bob;
+
+    view = glm::lookAt(camPos, camPos + direction, glm::vec3(0,1,0));
 }
 
-//create project matrix
 void Camera::calculateProjectionMatrix(const Window& window) {
     int width, height;
     glfwGetWindowSize(window.getGLFWwindow(), &width, &height);
 
     projection = glm::perspective(glm::radians(fov),
-                                  (float)width / (float)height,
+                                  static_cast<float>(width) / static_cast<float>(height),
                                   minDistance,
                                   maxDistance);
 }
 
-
-//return the view matrix
-glm::mat4 Camera::getViewMatrix(){
-    return this->view;
+glm::mat4 Camera::getViewMatrix() {
+    return view;
 }
 
-//return the projection matrix
-glm::mat4 Camera::getProjectionMatrix(){
-    return this->projection;
+glm::mat4 Camera::getProjectionMatrix() {
+    return projection;
 }
 
-//set the fov 
-void Camera::setFOV(int fov){
-    this->fov = fov;
+void Camera::setFOV(int fov) {
+    this->fov = static_cast<float>(fov);
 }
 
-//initalize mouse position
-void Camera::initMousePos(double x, double y){
+void Camera::initMousePos(double x, double y) {
     xPos = x;
     yPos = y;
 }
