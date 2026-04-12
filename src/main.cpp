@@ -24,7 +24,7 @@ int main() {
     tileMap.setupBuffers();
 
     // Fireflies
-    FireflySystem fireflySystem(10);
+    FireflySystem fireflySystem(25);
 
     // Foliage
     int seed = static_cast<int>(time(nullptr));
@@ -42,14 +42,6 @@ int main() {
         std::cerr << "Failed to load tree OBJ" << std::endl;
         return -1;
     }
-
-    // Debug normals
-    // for (int i = 0; i < 10 && i < loader.getVertices().size(); i++) {
-    //     std::cout << "Normal " << i << ": "
-    //               << loader.getVertices()[i].normal.x << ", "
-    //               << loader.getVertices()[i].normal.y << ", "
-    //               << loader.getVertices()[i].normal.z << std::endl;
-    // }
 
     // Tree mesh
     Mesh treeMesh(loader.getVertices(), loader.getIndices());
@@ -170,11 +162,9 @@ int main() {
         treeShader.setVec3("spotDir", camera.getFront());
         treeShader.setFloat("innerCutoff", glm::cos(glm::radians(12.5f)));
         treeShader.setFloat("outerCutoff", glm::cos(glm::radians(17.5f)));
-
         treeShader.setMat4("model", glm::mat4(1.0f));
         treeShader.setMat4("view", camera.getViewMatrix());
         treeShader.setMat4("projection", camera.getProjectionMatrix());
-
         treeTexture.bind(0);
         treeShader.setInt("treeTexture", 0);
 
