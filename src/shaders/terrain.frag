@@ -1,6 +1,9 @@
 #version 330 core
 in float vHeight;
+in vec2 vTexCoord;
 out vec4 fragColor;
+
+uniform sampler2D groundTexture;
 
 void main() {
     vec3 dirt  = vec3(0.12, 0.09, 0.05);  // dark soil
@@ -25,8 +28,13 @@ void main() {
         color = mix(moss, grass, t);
     }
 
-    // global darkening factor
-    color *= 0.4;
+    vec3 groundSample = texture(groundTexture, vTexCoord).rgb;
+
+    //height to add dimension
+    color = groundSample * mix(vec3(0.55), color * 2.2, 0.35);
+
+    // darkening factor
+    color *= 0.42;
 
     fragColor = vec4(color, 1.0);
 }

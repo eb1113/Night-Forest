@@ -1,5 +1,5 @@
 #version 330 core
-#define MAX_LIGHTS 64
+#define MAX_LIGHTS 12
 
 in vec3 FragPos;
 in vec3 Normal;
@@ -28,7 +28,7 @@ void main()
 {
     vec3 norm = normalize(Normal);
 
-    // Basic diffuse (optional)
+    // Basic diffuse
     vec3 L = normalize(spotPos - FragPos);
     float diff = max(dot(norm, L), 0.0);
 

@@ -1,6 +1,12 @@
 #include "main.h"
 #include <iostream>
 #include <ctime>
+#include <algorithm>
+#include <array>
+
+namespace {
+constexpr int kMaxFireflyLights = 12;
+}
 
 int main() {
     // Window setup
@@ -24,7 +30,7 @@ int main() {
     tileMap.setupBuffers();
 
     // Fireflies
-    FireflySystem fireflySystem(25);
+    FireflySystem fireflySystem(100);
 
     // Foliage
     int seed = static_cast<int>(time(nullptr));
@@ -48,6 +54,7 @@ int main() {
 
     // Tree texture
     Texture treeTexture("../models/branch.png");
+    Texture groundTexture("../models/textures/brown_mud_leaves_01_diff_4k.jpg");
 
     // Tree instance data
     std::vector<TreeInstanceData> instanceData;
@@ -85,14 +92,19 @@ int main() {
     glGenBuffers(1, &fireflyInstanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, fireflyInstanceVBO);
     glBufferData(GL_ARRAY_BUFFER,
-                 fireflySystem.getFireflies().size() * sizeof(glm::vec3),
+                 fireflySystem.getFireflies().size() * sizeof(Firefly),
                  nullptr, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Firefly), (void*)0);
     glVertexAttribDivisor(1, 1);
 
     glBindVertexArray(0);
+
+    const GLint fireflyLightPosLoc = glGetUniformLocation(treeShader.ID, "lightPos");
+    const GLint fireflyLightColorLoc = glGetUniformLocation(treeShader.ID, "lightColorArr");
+    const GLint fireflyLightRadiusLoc = glGetUniformLocation(treeShader.ID, "lightRadius");
+    std::vector<int> sortedFireflyIndices(fireflySystem.getFireflies().size());
 
     float lastTime = static_cast<float>(glfwGetTime());
 
@@ -107,18 +119,13 @@ int main() {
         // Update fireflies
         fireflySystem.update(deltaTime);
 
-        
         const auto& fireflies = fireflySystem.getFireflies();
-        std::vector<glm::vec3> fireflyPositions;
-        fireflyPositions.reserve(fireflies.size());
-        for (const auto& f : fireflies)
-            fireflyPositions.push_back(f.pos);
 
         glBindBuffer(GL_ARRAY_BUFFER, fireflyInstanceVBO);
-        if (!fireflyPositions.empty()) {
+        if (!fireflies.empty()) {
             glBufferSubData(GL_ARRAY_BUFFER, 0,
-                            fireflyPositions.size() * sizeof(glm::vec3),
-                            fireflyPositions.data());
+                            fireflies.size() * sizeof(Firefly),
+                            fireflies.data());
         }
 
         // Update camera
@@ -130,6 +137,8 @@ int main() {
         terrainShader.setMat4("model", glm::mat4(1.0f));
         terrainShader.setMat4("view", camera.getViewMatrix());
         terrainShader.setMat4("projection", camera.getProjectionMatrix());
+        groundTexture.bind(0);
+        terrainShader.setInt("groundTexture", 0);
         tileMap.draw();
 
         // Render fireflies
@@ -150,11 +159,40 @@ int main() {
         treeShader.setVec3("viewPos", camera.getPosition());
 
         // Firefly lights
-        treeShader.setInt("numLights", static_cast<int>(fireflies.size()));
-        for (int i = 0; i < static_cast<int>(fireflies.size()); i++) {
-            treeShader.setVec3("lightPos[" + std::to_string(i) + "]", fireflies[i].pos);
-            treeShader.setVec3("lightColorArr[" + std::to_string(i) + "]", fireflies[i].color);
-            treeShader.setFloat("lightRadius[" + std::to_string(i) + "]", fireflies[i].radius);
+        const int activeLightCount = std::min(static_cast<int>(fireflies.size()), kMaxFireflyLights);
+        std::array<glm::vec3, kMaxFireflyLights> lightPositions{};
+        std::array<glm::vec3, kMaxFireflyLights> lightColors{};
+        std::array<float, kMaxFireflyLights> lightRadii{};
+
+        if (activeLightCount > 0) {
+            for (int i = 0; i < static_cast<int>(fireflies.size()); ++i) {
+                sortedFireflyIndices[i] = i;
+            }
+
+            const glm::vec3 cameraPos = camera.getPosition();
+            std::partial_sort(
+                sortedFireflyIndices.begin(),
+                sortedFireflyIndices.begin() + activeLightCount,
+                sortedFireflyIndices.begin() + fireflies.size(),
+                [&](int lhs, int rhs) {
+                    const glm::vec3 lhsOffset = fireflies[lhs].pos - cameraPos;
+                    const glm::vec3 rhsOffset = fireflies[rhs].pos - cameraPos;
+                    return glm::dot(lhsOffset, lhsOffset) < glm::dot(rhsOffset, rhsOffset);
+                });
+
+            for (int i = 0; i < activeLightCount; ++i) {
+                const Firefly& firefly = fireflies[sortedFireflyIndices[i]];
+                lightPositions[i] = firefly.pos;
+                lightColors[i] = firefly.color;
+                lightRadii[i] = firefly.radius;
+            }
+        }
+
+        treeShader.setInt("numLights", activeLightCount);
+        if (activeLightCount > 0) {
+            glUniform3fv(fireflyLightPosLoc, activeLightCount, glm::value_ptr(lightPositions[0]));
+            glUniform3fv(fireflyLightColorLoc, activeLightCount, glm::value_ptr(lightColors[0]));
+            glUniform1fv(fireflyLightRadiusLoc, activeLightCount, lightRadii.data());
         }
 
         // Flashlight
