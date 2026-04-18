@@ -26,7 +26,16 @@ uniform sampler2D treeTexture;
 
 void main()
 {
+    vec4 texColor = texture(treeTexture, TexCoord);
+    if (texColor.a < 0.1)
+        discard;
+
     vec3 norm = normalize(Normal);
+    vec3 albedo = texColor.rgb;
+    float foliageMask = smoothstep(0.18, 0.55, albedo.g - max(albedo.r, albedo.b));
+
+    // Keep a small amount of moonlight-like fill so unlit leaves do not go fully black.
+    vec3 ambientLight = vec3(0.0,0.0,0.0);
 
     // Basic diffuse
     vec3 L = normalize(spotPos - FragPos);
@@ -34,18 +43,18 @@ void main()
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 halfwayDir = normalize(L + viewDir);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 32.0);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0), 18.0);
 
-    vec3 ambientLight  = 0.15 * lightColor;
-    vec3 diffuseLight  = diff * lightColor * .1;
-    vec3 specularLight = 0.3 * spec * lightColor;
+    vec3 diffuseLight  = diff * lightColor * 0.16;
+    vec3 specularLight = vec3(0.08) * spec * (1.0 - foliageMask * 0.65);
 
     // FLASHLIGHT 
     float theta = dot(L, normalize(-spotDir));
     float epsilon = innerCutoff - outerCutoff;
     float intensity = clamp((theta - outerCutoff) / epsilon, 0.0, 1.0);
-
-    vec3 flashlightLighting = (ambientLight + diffuseLight + specularLight) * intensity;
+    float flashlightDistance = length(spotPos - FragPos);
+    float flashlightFalloff = 1.0 / (1.0 + 0.001 * flashlightDistance + 0.004 * flashlightDistance * flashlightDistance);
+    vec3 flashlightLighting = (diffuseLight + specularLight) * intensity * flashlightFalloff;
 
     //logic for the fireflies we will see if this works
     vec3 pointLightTotal = vec3(0.0);
@@ -56,17 +65,20 @@ void main()
         PL = normalize(PL);
 
         float pdiff = max(dot(norm, PL), 0.0);
+        float radius = max(lightRadius[i], 0.001);
+        float normalizedDistance = clamp(dist / radius, 0.0, 1.0);
+        float attenuation = pow(1.0 - normalizedDistance, 2.0);
+        vec3 pointColor = mix(lightColorArr[i], vec3(dot(lightColorArr[i], vec3(0.299, 0.587, 0.114))), 0.35);
 
-        float attenuation = 1.0 / (1.0 + (dist * dist) / (lightRadius[i] * lightRadius[i]));
-
-        pointLightTotal += pdiff * lightColorArr[i] * attenuation;
+        pointLightTotal += pdiff * pointColor * attenuation * 0.65;
     }
 
-    vec3 lighting = flashlightLighting + pointLightTotal;
+    vec3 lighting = ambientLight + flashlightLighting + pointLightTotal;
+    vec3 litColor = albedo * lighting;
 
-    vec4 texColor = texture(treeTexture, TexCoord);
-    if (texColor.a < 0.1)
-        discard;
+    // Compress bright spikes so leaves keep detail 
+    litColor = litColor / (vec3(1.0) + litColor);
+    litColor = pow(litColor, vec3(1.0 / 1.15));
 
-    FragColor = vec4(texColor.rgb * lighting, texColor.a);
+    FragColor = vec4(litColor, texColor.a);
 }

@@ -30,7 +30,7 @@ int main() {
     tileMap.setupBuffers();
 
     // Fireflies
-    FireflySystem fireflySystem(100);
+    FireflySystem fireflySystem(150);
 
     // Foliage
     int seed = static_cast<int>(time(nullptr));
@@ -104,6 +104,9 @@ int main() {
     const GLint fireflyLightPosLoc = glGetUniformLocation(treeShader.ID, "lightPos");
     const GLint fireflyLightColorLoc = glGetUniformLocation(treeShader.ID, "lightColorArr");
     const GLint fireflyLightRadiusLoc = glGetUniformLocation(treeShader.ID, "lightRadius");
+    const GLint terrainFireflyLightPosLoc = glGetUniformLocation(terrainShader.ID, "lightPos");
+    const GLint terrainFireflyLightColorLoc = glGetUniformLocation(terrainShader.ID, "lightColorArr");
+    const GLint terrainFireflyLightRadiusLoc = glGetUniformLocation(terrainShader.ID, "lightRadius");
     std::vector<int> sortedFireflyIndices(fireflySystem.getFireflies().size());
 
     float lastTime = static_cast<float>(glfwGetTime());
@@ -132,33 +135,6 @@ int main() {
         camera.calculateProjectionMatrix(window);
         camera.calculateViewMatrix(window, tileMap);
 
-        // Render terrain
-        terrainShader.use();
-        terrainShader.setMat4("model", glm::mat4(1.0f));
-        terrainShader.setMat4("view", camera.getViewMatrix());
-        terrainShader.setMat4("projection", camera.getProjectionMatrix());
-        groundTexture.bind(0);
-        terrainShader.setInt("groundTexture", 0);
-        tileMap.draw();
-
-        // Render fireflies
-        fireflyShader.use();
-        fireflyShader.setMat4("view", camera.getViewMatrix());
-        fireflyShader.setMat4("projection", camera.getProjectionMatrix());
-        fireflyShader.setFloat("size", 0.4f);
-        fireflyShader.setVec3("color", glm::vec3(1.0f, 0.9f, 0.5f));
-
-        glBindVertexArray(fireflyVAO);
-        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, static_cast<GLsizei>(fireflies.size()));
-        glBindVertexArray(0);
-
-
-        treeShader.use();
-
-        treeShader.setVec3("lightColor", glm::vec3(1.0f));
-        treeShader.setVec3("viewPos", camera.getPosition());
-
-        // Firefly lights
         const int activeLightCount = std::min(static_cast<int>(fireflies.size()), kMaxFireflyLights);
         std::array<glm::vec3, kMaxFireflyLights> lightPositions{};
         std::array<glm::vec3, kMaxFireflyLights> lightColors{};
@@ -188,6 +164,41 @@ int main() {
             }
         }
 
+        // Render terrain
+        terrainShader.use();
+        terrainShader.setMat4("model", glm::mat4(1.0f));
+        terrainShader.setMat4("view", camera.getViewMatrix());
+        terrainShader.setMat4("projection", camera.getProjectionMatrix());
+        terrainShader.setVec3("lightColor", glm::vec3(1.0f));
+        terrainShader.setVec3("viewPos", camera.getPosition());
+        terrainShader.setVec3("spotPos", camera.getPosition());
+        terrainShader.setVec3("spotDir", camera.getFront());
+        terrainShader.setFloat("innerCutoff", glm::cos(glm::radians(12.5f)));
+        terrainShader.setFloat("outerCutoff", glm::cos(glm::radians(17.5f)));
+        terrainShader.setInt("numLights", activeLightCount);
+        if (activeLightCount > 0) {
+            glUniform3fv(terrainFireflyLightPosLoc, activeLightCount, glm::value_ptr(lightPositions[0]));
+            glUniform3fv(terrainFireflyLightColorLoc, activeLightCount, glm::value_ptr(lightColors[0]));
+            glUniform1fv(terrainFireflyLightRadiusLoc, activeLightCount, lightRadii.data());
+        }
+        groundTexture.bind(0);
+        terrainShader.setInt("groundTexture", 0);
+        tileMap.draw();
+
+        // Render fireflies
+        fireflyShader.use();
+        fireflyShader.setMat4("view", camera.getViewMatrix());
+        fireflyShader.setMat4("projection", camera.getProjectionMatrix());
+        fireflyShader.setFloat("size", 0.4f);
+        fireflyShader.setVec3("color", glm::vec3(1.0f, 0.9f, 0.5f));
+
+        glBindVertexArray(fireflyVAO);
+        glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, static_cast<GLsizei>(fireflies.size()));
+        glBindVertexArray(0);
+
+        treeShader.use();
+        treeShader.setVec3("lightColor", glm::vec3(1.0f));
+        treeShader.setVec3("viewPos", camera.getPosition());
         treeShader.setInt("numLights", activeLightCount);
         if (activeLightCount > 0) {
             glUniform3fv(fireflyLightPosLoc, activeLightCount, glm::value_ptr(lightPositions[0]));
