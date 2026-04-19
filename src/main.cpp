@@ -20,6 +20,7 @@ int main() {
     Shader terrainShader("../src/shaders/terrain.vert", "../src/shaders/terrain.frag");
     Shader treeShader("../src/shaders/tree.vert", "../src/shaders/tree.frag");
     Shader fireflyShader("../src/shaders/firefly.vert", "../src/shaders/firefly.frag");
+    Shader skyShader("../src/shaders/sky.vert", "../src/shaders/sky.frag");
 
     // Camera
     Camera camera(glm::vec3(0.0f, 5.0f, 50.0f), 0.0f, 1.0f, 20.0f);
@@ -101,6 +102,26 @@ int main() {
 
     glBindVertexArray(0);
 
+    unsigned int skyVAO = 0;
+    unsigned int skyVBO = 0;
+    const float skyQuadVerts[] = {
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
+         1.0f,  1.0f,
+        -1.0f, -1.0f,
+         1.0f,  1.0f,
+        -1.0f,  1.0f
+    };
+
+    glGenVertexArrays(1, &skyVAO);
+    glGenBuffers(1, &skyVBO);
+    glBindVertexArray(skyVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyQuadVerts), skyQuadVerts, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glBindVertexArray(0);
+
     const GLint fireflyLightPosLoc = glGetUniformLocation(treeShader.ID, "lightPos");
     const GLint fireflyLightColorLoc = glGetUniformLocation(treeShader.ID, "lightColorArr");
     const GLint fireflyLightRadiusLoc = glGetUniformLocation(treeShader.ID, "lightRadius");
@@ -134,6 +155,20 @@ int main() {
         // Update camera
         camera.calculateProjectionMatrix(window);
         camera.calculateViewMatrix(window, tileMap);
+
+        // Render sky first with camera rotation only.
+        glDepthMask(GL_FALSE);
+        glDisable(GL_DEPTH_TEST);
+        skyShader.use();
+        skyShader.setMat4("invProjection", glm::inverse(camera.getProjectionMatrix()));
+        skyShader.setMat4("invViewRotation", glm::inverse(glm::mat4(glm::mat3(camera.getViewMatrix()))));
+        skyShader.setFloat("time", currentTime);
+        skyShader.setVec3("moonDirection", glm::normalize(glm::vec3(-0.35f, 0.72f, -0.6f)));
+        glBindVertexArray(skyVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
 
         const int activeLightCount = std::min(static_cast<int>(fireflies.size()), kMaxFireflyLights);
         std::array<glm::vec3, kMaxFireflyLights> lightPositions{};
