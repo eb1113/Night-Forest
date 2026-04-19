@@ -64,7 +64,7 @@ void main() {
     float epsilon = innerCutoff - outerCutoff;
     float intensity = clamp((theta - outerCutoff) / epsilon, 0.0, 1.0);
     float flashlightDistance = length(spotPos - vWorldPos);
-    float flashlightFalloff = 1.0 / (1.0 + 0.01 * flashlightDistance + 0.018 * flashlightDistance * flashlightDistance);
+    float flashlightFalloff = 1.0 / (1.0 + 0.00045 * flashlightDistance + 0.0016 * flashlightDistance * flashlightDistance);
 
     vec3 flashlightLighting =
         (diff * lightColor * 0.22 + vec3(0.05) * spec) *

@@ -35,6 +35,7 @@ void main()
     float foliageMask = smoothstep(0.18, 0.55, albedo.g - max(albedo.r, albedo.b));
 
     // Keep a small amount of moonlight-like fill so unlit leaves do not go fully black.
+    //changed they are fully black now, but keeping the comment to maybe come back to
     vec3 ambientLight = vec3(0.0,0.0,0.0);
 
     // Basic diffuse
@@ -53,7 +54,7 @@ void main()
     float epsilon = innerCutoff - outerCutoff;
     float intensity = clamp((theta - outerCutoff) / epsilon, 0.0, 1.0);
     float flashlightDistance = length(spotPos - FragPos);
-    float flashlightFalloff = 1.0 / (1.0 + 0.001 * flashlightDistance + 0.004 * flashlightDistance * flashlightDistance);
+    float flashlightFalloff = 1.0 / (1.0 + 0.00035 * flashlightDistance + 0.0012 * flashlightDistance * flashlightDistance);
     vec3 flashlightLighting = (diffuseLight + specularLight) * intensity * flashlightFalloff;
 
     //logic for the fireflies we will see if this works
