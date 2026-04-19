@@ -6,6 +6,7 @@
 
 namespace {
 constexpr int kMaxFireflyLights = 12;
+constexpr bool kUseDebugShrubMesh = false;
 }
 
 int main() {
@@ -19,6 +20,7 @@ int main() {
     // Shaders
     Shader terrainShader("../src/shaders/terrain.vert", "../src/shaders/terrain.frag");
     Shader treeShader("../src/shaders/tree.vert", "../src/shaders/tree.frag");
+    Shader shrubShader("../src/shaders/shrub.vert", "../src/shaders/shrub.frag");
     Shader fireflyShader("../src/shaders/firefly.vert", "../src/shaders/firefly.frag");
     Shader skyShader("../src/shaders/sky.vert", "../src/shaders/sky.frag");
 
@@ -37,6 +39,7 @@ int main() {
     int seed = static_cast<int>(time(nullptr));
     tileMap.generateFoliage(seed, 1);
 
+    
     std::cout << "Generated "
               << tileMap.getTrees().size()
               << " trees and "
@@ -50,11 +53,23 @@ int main() {
         return -1;
     }
 
+    //it is loading the shrub since it doesn't show this error message
+    
+    //ObjLoader shrubLoader( "../models/searsia_lucida_lod2.obj");
+    ObjLoader shrubLoader("../models/low-poly.obj");
+    if (!shrubLoader.load()) {
+        std::cerr << "Failed to load shrub OBJ" << std::endl;
+        return -1;
+    }
+
     // Tree mesh
     Mesh treeMesh(loader.getVertices(), loader.getIndices());
+    Mesh shrubMesh(shrubLoader.getVertices(), shrubLoader.getIndices());
 
-    // Tree texture
+    // Tree texture and bushes
     Texture treeTexture("../models/branch.png");
+    Texture shrubTexture("../models/low-poly-shrub-extracted/textures/oooo_diffuseOriginal.png");
+    Texture shrubAlphaTexture("../models/low-poly-shrub-extracted/textures/oooo_diffuseOriginal.png");
     Texture groundTexture("../models/textures/brown_mud_leaves_01_diff_4k.jpg");
 
     // Tree instance data
@@ -63,6 +78,12 @@ int main() {
     for (const TreeInstance& t : tileMap.getTrees()) {
         instanceData.push_back({ t.position, t.rotation, t.scale });
     }
+    // Shrub instance data
+    std::vector<TreeInstanceData> shrubInstanceData;
+    shrubInstanceData.reserve(tileMap.getShrubs().size());
+    for (const ShrubInstance& shrub : tileMap.getShrubs()) {
+        shrubInstanceData.push_back({ shrub.position, shrub.rotation, shrub.scale * (kUseDebugShrubMesh ? 3.5f : 0.65f) });
+    }
 
     unsigned int instanceVBO;
     glGenBuffers(1, &instanceVBO);
@@ -70,6 +91,13 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, instanceData.size() * sizeof(TreeInstanceData),
                  instanceData.data(), GL_STATIC_DRAW);
     treeMesh.addInstanceBuffer(instanceVBO);
+
+    unsigned int shrubInstanceVBO;
+    glGenBuffers(1, &shrubInstanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, shrubInstanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, shrubInstanceData.size() * sizeof(TreeInstanceData),
+                 shrubInstanceData.data(), GL_STATIC_DRAW);
+    shrubMesh.addInstanceBuffer(shrubInstanceVBO);
 
     // Firefly quad + instance buffers
     unsigned int fireflyVAO, fireflyVBO, fireflyInstanceVBO;
@@ -125,6 +153,9 @@ int main() {
     const GLint fireflyLightPosLoc = glGetUniformLocation(treeShader.ID, "lightPos");
     const GLint fireflyLightColorLoc = glGetUniformLocation(treeShader.ID, "lightColorArr");
     const GLint fireflyLightRadiusLoc = glGetUniformLocation(treeShader.ID, "lightRadius");
+    const GLint shrubFireflyLightPosLoc = glGetUniformLocation(shrubShader.ID, "lightPos");
+    const GLint shrubFireflyLightColorLoc = glGetUniformLocation(shrubShader.ID, "lightColorArr");
+    const GLint shrubFireflyLightRadiusLoc = glGetUniformLocation(shrubShader.ID, "lightRadius");
     const GLint terrainFireflyLightPosLoc = glGetUniformLocation(terrainShader.ID, "lightPos");
     const GLint terrainFireflyLightColorLoc = glGetUniformLocation(terrainShader.ID, "lightColorArr");
     const GLint terrainFireflyLightRadiusLoc = glGetUniformLocation(terrainShader.ID, "lightRadius");
@@ -257,6 +288,7 @@ int main() {
         treeShader.setMat4("projection", camera.getProjectionMatrix());
         treeTexture.bind(0);
         treeShader.setInt("treeTexture", 0);
+        treeShader.setInt("useAlphaMask", 0);
 
         glBindVertexArray(treeMesh.VAO);
         glDrawElementsInstanced(GL_TRIANGLES,
@@ -264,6 +296,60 @@ int main() {
                                 GL_UNSIGNED_INT, 0,
                                 static_cast<GLsizei>(instanceData.size()));
         glBindVertexArray(0);
+
+        if (kUseDebugShrubMesh) {
+            shrubShader.use();
+            shrubShader.setVec3("lightColor", glm::vec3(1.0f));
+            shrubShader.setVec3("viewPos", camera.getPosition());
+            shrubShader.setInt("numLights", activeLightCount);
+            if (activeLightCount > 0) {
+                glUniform3fv(shrubFireflyLightPosLoc, activeLightCount, glm::value_ptr(lightPositions[0]));
+                glUniform3fv(shrubFireflyLightColorLoc, activeLightCount, glm::value_ptr(lightColors[0]));
+                glUniform1fv(shrubFireflyLightRadiusLoc, activeLightCount, lightRadii.data());
+            }
+            shrubShader.setVec3("spotPos", camera.getPosition());
+            shrubShader.setVec3("spotDir", camera.getFront());
+            shrubShader.setFloat("innerCutoff", glm::cos(glm::radians(12.5f)));
+            shrubShader.setFloat("outerCutoff", glm::cos(glm::radians(17.5f)));
+            shrubShader.setMat4("view", camera.getViewMatrix());
+            shrubShader.setMat4("projection", camera.getProjectionMatrix());
+            groundTexture.bind(0);
+            shrubShader.setInt("shrubTexture", 0);
+            groundTexture.bind(1);
+            shrubShader.setInt("shrubAlphaTexture", 1);
+        } else {
+            shrubShader.use();
+            shrubShader.setVec3("lightColor", glm::vec3(1.0f));
+            shrubShader.setVec3("viewPos", camera.getPosition());
+            shrubShader.setInt("numLights", activeLightCount);
+            if (activeLightCount > 0) {
+                glUniform3fv(shrubFireflyLightPosLoc, activeLightCount, glm::value_ptr(lightPositions[0]));
+                glUniform3fv(shrubFireflyLightColorLoc, activeLightCount, glm::value_ptr(lightColors[0]));
+                glUniform1fv(shrubFireflyLightRadiusLoc, activeLightCount, lightRadii.data());
+            }
+            shrubShader.setVec3("spotPos", camera.getPosition());
+            shrubShader.setVec3("spotDir", camera.getFront());
+            shrubShader.setFloat("innerCutoff", glm::cos(glm::radians(12.5f)));
+            shrubShader.setFloat("outerCutoff", glm::cos(glm::radians(17.5f)));
+            shrubShader.setMat4("view", camera.getViewMatrix());
+            shrubShader.setMat4("projection", camera.getProjectionMatrix());
+            shrubTexture.bind(0);
+            shrubShader.setInt("shrubTexture", 0);
+            shrubAlphaTexture.bind(1);
+            shrubShader.setInt("shrubAlphaTexture", 1);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+
+        glBindVertexArray(shrubMesh.VAO);
+        glDrawElementsInstanced(GL_TRIANGLES,
+                                static_cast<GLsizei>(shrubMesh.indices.size()),
+                                GL_UNSIGNED_INT, 0,
+                                static_cast<GLsizei>(shrubInstanceData.size()));
+        glBindVertexArray(0);
+        if (!kUseDebugShrubMesh) {
+            glDisable(GL_BLEND);
+        }
 
         window.swapBuffers();
         window.pollEvents();

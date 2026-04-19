@@ -208,11 +208,62 @@ void TileMap::generateFoliage(int seed, int numTreeTypes) {
                 TreeInstance tree;
                 tree.position = glm::vec3(i*tileSize, getHeightAt(i*tileSize,j*tileSize), j*tileSize);
                 tree.rotation = glm::radians((float)(rand()%360));
-                tree.scale = 0.8f + ((rand()%20)/10.0f); // scale 0.8-2.0
+                tree.scale = 0.8f + ((rand()%20)/10.0f); 
                 if(numTreeTypes>0) tree.treeType = rand() % numTreeTypes;
                 else tree.treeType = 0;
                 trees.push_back(tree);
             }
         }
     }
+
+    // Build shrub-only clusters after the tree pass so undergrowth fills around
+    // the forest structure instead of depending on the same strict cluster gate.
+    std::vector<FoliageCluster> shrubClusters;
+    shrubClusters.reserve(trees.size() / 2 + 16);
+
+    for (const TreeInstance& tree : trees) {
+        if ((rand() % 100) >= 20) {
+            continue;
+        }
+
+        FoliageCluster cluster;
+        cluster.center = glm::vec2(
+            tree.position.x + ((rand() % 100) / 100.0f - 0.5f) * 6.0f,
+            tree.position.z + ((rand() % 100) / 100.0f - 0.5f) * 6.0f);
+        cluster.radius = 3.5f + ((rand() % 100) / 100.0f) * 3.0f;
+        cluster.density = 0.45f + ((rand() % 100) / 100.0f) * 0.4f;
+        cluster.vegetationType = 1;
+        shrubClusters.push_back(cluster);
+    }
+
+    // Add occasional free-standing shrub patches so open spaces still get some
+    // low vegetation without turning into dense tree blockers.
+    for (int i = 0; i < gridWidth; i += 18) {
+        for (int j = 0; j < gridDepth; j += 18) {
+            if ((rand() % 100) >= 4) {
+                continue;
+            }
+
+            FoliageCluster cluster;
+            cluster.center = glm::vec2(
+                i * tileSize + ((rand() % 100) / 100.0f) * 18.0f * tileSize,
+                j * tileSize + ((rand() % 100) / 100.0f) * 18.0f * tileSize);
+            cluster.radius = 4.0f + ((rand() % 100) / 100.0f) * 4.0f;
+            cluster.density = 0.35f + ((rand() % 100) / 100.0f) * 0.3f;
+            cluster.vegetationType = 1;
+            shrubClusters.push_back(cluster);
+        }
+    }
+
+    printf("Generated %zu shrub clusters\n", shrubClusters.size());
+
+    for (size_t clusterIndex = 0; clusterIndex < shrubClusters.size(); ++clusterIndex) {
+        std::vector<ShrubInstance> clusterShrubs = FoliageGenerator::generateShrubs(
+            shrubClusters[clusterIndex],
+            [this](float x, float z) { return getHeightAt(x, z); },
+            seed + static_cast<int>(clusterIndex) * 17);
+
+        shrubs.insert(shrubs.end(), clusterShrubs.begin(), clusterShrubs.end());
+    }
+
 }

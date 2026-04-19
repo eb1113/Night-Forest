@@ -23,31 +23,42 @@ uniform vec3 lightColorArr[MAX_LIGHTS];
 uniform float lightRadius[MAX_LIGHTS];
 
 uniform sampler2D treeTexture;
+uniform sampler2D alphaTexture;
+uniform int useAlphaMask;
 
 void main()
 {
     vec4 texColor = texture(treeTexture, TexCoord);
-    if (texColor.a < 0.1)
+    float alpha = texColor.a;
+    if (useAlphaMask == 1) {
+        alpha = texture(alphaTexture, TexCoord).r;
+    }
+
+    if (alpha < 0.08)
         discard;
 
-    vec3 norm = normalize(Normal);
+    if (useAlphaMask == 1) {
+        alpha = smoothstep(0.08, 0.75, alpha);
+    }
+
     vec3 albedo = texColor.rgb;
     float foliageMask = smoothstep(0.18, 0.55, albedo.g - max(albedo.r, albedo.b));
 
     // Keep a small amount of moonlight-like fill so unlit leaves do not go fully black.
     //changed they are fully black now, but keeping the comment to maybe come back to
-    vec3 ambientLight = vec3(0.0,0.0,0.0);
+    vec3 ambientLight = mix(vec3(0.0), vec3(0.02, 0.03, 0.02), float(useAlphaMask));
 
     // Basic diffuse
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 norm = normalize(faceforward(Normal, -viewDir, Normal));
     vec3 L = normalize(spotPos - FragPos);
     float diff = max(dot(norm, L), 0.0);
 
-    vec3 viewDir = normalize(viewPos - FragPos);
     vec3 halfwayDir = normalize(L + viewDir);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 18.0);
 
     vec3 diffuseLight  = diff * lightColor * 0.16;
-    vec3 specularLight = vec3(0.08) * spec * (1.0 - foliageMask * 0.65);
+    vec3 specularLight = vec3(0.08) * spec * (1.0 - foliageMask * 0.65) * (1.0 - 0.55 * float(useAlphaMask));
 
     // FLASHLIGHT 
     float theta = dot(L, normalize(-spotDir));
@@ -55,7 +66,9 @@ void main()
     float intensity = clamp((theta - outerCutoff) / epsilon, 0.0, 1.0);
     float flashlightDistance = length(spotPos - FragPos);
     float flashlightFalloff = 1.0 / (1.0 + 0.00035 * flashlightDistance + 0.0012 * flashlightDistance * flashlightDistance);
-    vec3 flashlightLighting = (diffuseLight + specularLight) * intensity * flashlightFalloff;
+    float leafTranslucency = max(dot(-norm, L), 0.0) * foliageMask * float(useAlphaMask);
+    vec3 translucencyLight = lightColor * leafTranslucency * 0.12;
+    vec3 flashlightLighting = (diffuseLight + specularLight + translucencyLight) * intensity * flashlightFalloff;
 
     //logic for the fireflies we will see if this works
     vec3 pointLightTotal = vec3(0.0);
@@ -74,12 +87,13 @@ void main()
         pointLightTotal += pdiff * pointColor * attenuation * 0.65;
     }
 
+    vec3 foliageTint = mix(vec3(1.0), vec3(0.92, 1.0, 0.9), foliageMask * float(useAlphaMask) * 0.35);
     vec3 lighting = ambientLight + flashlightLighting + pointLightTotal;
-    vec3 litColor = albedo * lighting;
+    vec3 litColor = albedo * foliageTint * lighting;
 
     // Compress bright spikes so leaves keep detail 
     litColor = litColor / (vec3(1.0) + litColor);
     litColor = pow(litColor, vec3(1.0 / 1.15));
 
-    FragColor = vec4(litColor, texColor.a);
+    FragColor = vec4(litColor, alpha);
 }

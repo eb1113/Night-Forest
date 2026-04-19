@@ -30,8 +30,8 @@ std::vector<FoliageCluster> FoliageGenerator::generateClusters(
 
     // Tuned for walkable forest
  
-    int clusterSpacing = 50;        // fewer clusters
-    float clusterThreshold = 0.8f;  // only strong noise creates clusters
+    int clusterSpacing = 50;        
+    float clusterThreshold = 0.8f;  
 
     for (int i = 0; i < worldWidth; i += clusterSpacing) {
         for (int j = 0; j < worldDepth; j += clusterSpacing) {
@@ -63,7 +63,7 @@ std::vector<FoliageCluster> FoliageGenerator::generateClusters(
             else if (typeNoise < 0.7f)
                 cluster.vegetationType = 1; // shrubs
             else
-                cluster.vegetationType = 2; // mixed
+                cluster.vegetationType = 2; 
 
             clusters.push_back(cluster);
         }
@@ -89,8 +89,6 @@ bool FoliageGenerator::isValidPosition(glm::vec3 pos,
     }
     return true;
 }
-
-
 
 
 // Generate trees inside a cluster
@@ -136,7 +134,7 @@ std::vector<TreeInstance> FoliageGenerator::generateTrees(
     return trees;
 }
 
-// Generate shrubs (similar logic)
+// Generate shrubs
 
 std::vector<ShrubInstance> FoliageGenerator::generateShrubs(
     const FoliageCluster& cluster,
@@ -148,12 +146,12 @@ std::vector<ShrubInstance> FoliageGenerator::generateShrubs(
     std::mt19937 rng(seed + (int)cluster.center.x + (int)cluster.center.y + 5000);
     std::uniform_real_distribution<float> angleDist(0.0f, 2.0f * 3.14159265f);
     std::uniform_real_distribution<float> distDist(0.0f, 1.0f);
-    std::uniform_real_distribution<float> scaleDist(0.5f, 1.0f);
+    std::uniform_real_distribution<float> scaleDist(0.9f, 1.6f);
 
     float minDistance = 2.0f;
 
-    int maxAttempts = (int)(cluster.radius * cluster.radius * cluster.density);
-    maxAttempts = std::clamp(maxAttempts, 20, 400);
+    int maxAttempts = (int)(cluster.radius * cluster.radius * cluster.density * 1.6f);
+    maxAttempts = std::clamp(maxAttempts, 40, 700);
 
     for (int attempt = 0; attempt < maxAttempts; ++attempt) {
         float angle = angleDist(rng);
