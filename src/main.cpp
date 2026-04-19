@@ -30,7 +30,7 @@ int main() {
     tileMap.setupBuffers();
 
     // Fireflies
-    FireflySystem fireflySystem(150);
+    FireflySystem fireflySystem(300);
 
     // Foliage
     int seed = static_cast<int>(time(nullptr));
