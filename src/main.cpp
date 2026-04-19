@@ -189,12 +189,18 @@ int main() {
         fireflyShader.use();
         fireflyShader.setMat4("view", camera.getViewMatrix());
         fireflyShader.setMat4("projection", camera.getProjectionMatrix());
-        fireflyShader.setFloat("size", 0.4f);
+        fireflyShader.setFloat("size", 0.28f);
         fireflyShader.setVec3("color", glm::vec3(1.0f, 0.9f, 0.5f));
+        fireflyShader.setFloat("time", currentTime);
 
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDepthMask(GL_FALSE);
         glBindVertexArray(fireflyVAO);
         glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 4, static_cast<GLsizei>(fireflies.size()));
         glBindVertexArray(0);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
 
         treeShader.use();
         treeShader.setVec3("lightColor", glm::vec3(1.0f));

@@ -3,6 +3,9 @@
 layout (location = 0) in vec2 quadPos;  
 layout (location = 1) in vec3 instancePos; // firefly world position
 
+out vec2 TexCoord;
+out vec3 ParticleWorldPos;
+
 uniform mat4 view;
 uniform mat4 projection;
 uniform float size;
@@ -15,4 +18,6 @@ void main()
     vec3 worldPos = instancePos + (billboard * vec4(quadPos * size, 0.0, 0.0)).xyz;
 
     gl_Position = projection * view * vec4(worldPos, 1.0);
+    TexCoord = quadPos + vec2(0.5);
+    ParticleWorldPos = instancePos;
 }
