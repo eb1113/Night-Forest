@@ -34,7 +34,8 @@ void main()
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 norm = normalize(faceforward(Normal, -viewDir, Normal));
-    vec3 albedo = texColor.rgb;
+    vec3 shrubTint = vec3(0.29, 0.52, 0.23);
+    vec3 albedo = texColor.rgb * shrubTint;
 
     float foliageMask = smoothstep(0.08, 0.45, albedo.g - max(albedo.r, albedo.b));
     vec3 ambientLight = vec3(0.025, 0.035, 0.025);
@@ -73,7 +74,7 @@ void main()
         pointLightTotal += (pdiff * 0.55 + pback * foliageMask * 0.35) * pointColor * attenuation;
     }
 
-    vec3 colorLift = mix(vec3(1.0), vec3(0.9, 1.02, 0.9), foliageMask * 0.3);
+    vec3 colorLift = mix(vec3(0.9, 0.95, 0.9), vec3(0.45, 0.72, 0.45), foliageMask * 0.62);
     vec3 lighting = ambientLight + flashlightLighting + pointLightTotal * 0.55;
     vec3 litColor = albedo * colorLift * lighting;
     litColor = litColor / (vec3(1.0) + litColor);

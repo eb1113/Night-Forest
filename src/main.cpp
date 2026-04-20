@@ -29,7 +29,7 @@ int main() {
 
     // Terrain
     TileMap tileMap;
-    tileMap.generateGrid(300, 300, 1.0f);
+    tileMap.generateGrid(200, 200, 1.0f);
     tileMap.setupBuffers();
 
     // Fireflies

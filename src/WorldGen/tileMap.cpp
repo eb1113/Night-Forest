@@ -216,13 +216,13 @@ void TileMap::generateFoliage(int seed, int numTreeTypes) {
         }
     }
 
-    // Build shrub-only clusters after the tree pass so undergrowth fills around
-    // the forest structure instead of depending on the same strict cluster gate.
+    // generating shrubs hope that this logic work  :)
+    //update it did: the for loop with the random helps with density
     std::vector<FoliageCluster> shrubClusters;
     shrubClusters.reserve(trees.size() / 2 + 16);
 
     for (const TreeInstance& tree : trees) {
-        if ((rand() % 100) >= 20) {
+        if ((rand() % 100) >= 15) { //tunning
             continue;
         }
 
@@ -236,8 +236,7 @@ void TileMap::generateFoliage(int seed, int numTreeTypes) {
         shrubClusters.push_back(cluster);
     }
 
-    // Add occasional free-standing shrub patches so open spaces still get some
-    // low vegetation without turning into dense tree blockers.
+
     for (int i = 0; i < gridWidth; i += 18) {
         for (int j = 0; j < gridDepth; j += 18) {
             if ((rand() % 100) >= 4) {

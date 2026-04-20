@@ -57,8 +57,9 @@ void main()
     vec3 halfwayDir = normalize(L + viewDir);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 18.0);
 
-    vec3 diffuseLight  = diff * lightColor * 0.16;
-    vec3 specularLight = vec3(0.08) * spec * (1.0 - foliageMask * 0.65) * (1.0 - 0.55 * float(useAlphaMask));
+    //changed this see if it helps
+    vec3 diffuseLight  = diff * lightColor * 0.08;
+    vec3 specularLight = vec3(0.045, 0.055, 0.045) * spec * (1.0 - foliageMask * 0.8) * (1.0 - 0.6 * float(useAlphaMask));
 
     // FLASHLIGHT 
     float theta = dot(L, normalize(-spotDir));
@@ -67,7 +68,7 @@ void main()
     float flashlightDistance = length(spotPos - FragPos);
     float flashlightFalloff = 1.0 / (1.0 + 0.00035 * flashlightDistance + 0.0012 * flashlightDistance * flashlightDistance);
     float leafTranslucency = max(dot(-norm, L), 0.0) * foliageMask * float(useAlphaMask);
-    vec3 translucencyLight = lightColor * leafTranslucency * 0.12;
+    vec3 translucencyLight = lightColor * leafTranslucency * 0.08;
     vec3 flashlightLighting = (diffuseLight + specularLight + translucencyLight) * intensity * flashlightFalloff;
 
     //logic for the fireflies we will see if this works
@@ -87,7 +88,7 @@ void main()
         pointLightTotal += pdiff * pointColor * attenuation * 0.65;
     }
 
-    vec3 foliageTint = mix(vec3(1.0), vec3(0.92, 1.0, 0.9), foliageMask * float(useAlphaMask) * 0.35);
+    vec3 foliageTint = mix(vec3(0.94, 0.97, 0.94), vec3(0.54, 0.74, 0.5), foliageMask * 0.58);
     vec3 lighting = ambientLight + flashlightLighting + pointLightTotal;
     vec3 litColor = albedo * foliageTint * lighting;
 
