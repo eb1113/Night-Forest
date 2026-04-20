@@ -28,6 +28,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 direction) {
     acceleration    = 0.06f;
     damping         = 0.85f;
     collisionRadius = 0.5f;
+    
 }
 
 Camera::Camera(glm::vec3 position, float yaw, float pitch, float roll) {
@@ -125,6 +126,16 @@ bool Camera::collidesWith(const glm::vec3& newPos, const TileMap& tileMap) {
 void Camera::calculateViewMatrix(const Window& window, const TileMap& tileMap) {
     double mouseX, mouseY;
     glfwGetCursorPos(window.getGLFWwindow(), &mouseX, &mouseY);
+
+    //help8ing with the initial mouse jump which is messing up my yaw so i can't move my (head) to the far left
+    //don't think this was my issue but going to keep in while I am debugigng
+    
+    static bool firstFrame = true;
+    if (firstFrame){
+        xPos = mouseX;
+        yPos = mouseY;
+        firstFrame = false;
+    }
 
     double deltaX = mouseX - xPos;
     double deltaY = yPos - mouseY; 

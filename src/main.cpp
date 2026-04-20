@@ -13,7 +13,7 @@ int main() {
     // Window setup
     Window window(1920, 1080, "Night Forest");
     if (!window.isOpen()) return -1;
-
+    
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
 
@@ -26,6 +26,7 @@ int main() {
 
     // Camera
     Camera camera(glm::vec3(0.0f, 5.0f, 50.0f), 0.0f, 1.0f, 20.0f);
+    
 
     // Terrain
     TileMap tileMap;
@@ -46,16 +47,14 @@ int main() {
               << tileMap.getShrubs().size()
               << " shrubs." << std::endl;
 
-    // Load tree model
+    // Load tree 
     ObjLoader loader("../models/fir.obj");
     if (!loader.load()) {
         std::cerr << "Failed to load tree OBJ" << std::endl;
         return -1;
     }
 
-    //it is loading the shrub since it doesn't show this error message
-    
-    //ObjLoader shrubLoader( "../models/searsia_lucida_lod2.obj");
+   //load shrub
     ObjLoader shrubLoader("../models/low-poly.obj");
     if (!shrubLoader.load()) {
         std::cerr << "Failed to load shrub OBJ" << std::endl;
