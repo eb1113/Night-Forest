@@ -30,7 +30,8 @@ bool ObjLoader::load() {
         } else if (type == "vt") {
             glm::vec2 t;
             ss >> t.x >> t.y;
-            t.y = 1.0f - t.y;   // <‑‑ FIX BLENDER UVs
+            //fix for blender objects
+            t.y = 1.0f - t.y;   
             texCoords.push_back(t);
 
         } else if (type == "vn") {
@@ -67,7 +68,7 @@ bool ObjLoader::load() {
         }
     }
 
-    // If OBJ had no normals, generate them
+    // If OBJ had no normals generate them
     if (normals.empty()) {
         for (auto& v : vertices)
             v.normal = glm::vec3(0.0f);
