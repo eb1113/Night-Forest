@@ -11,7 +11,7 @@ constexpr bool kUseDebugShrubMesh = false;
 
 int main() {
     // Window setup
-    Window window(2000, 1500, "Night Forest");
+    Window window(1920, 1080, "Night Forest");
     if (!window.isOpen()) return -1;
 
     glEnable(GL_DEPTH_TEST);
@@ -29,7 +29,7 @@ int main() {
 
     // Terrain
     TileMap tileMap;
-    tileMap.generateGrid(200, 200, 1.0f);
+    tileMap.generateGrid(100, 100, 1.0f);
     tileMap.setupBuffers();
 
     // Fireflies
@@ -187,7 +187,7 @@ int main() {
         camera.calculateProjectionMatrix(window);
         camera.calculateViewMatrix(window, tileMap);
 
-        // Render sky first with camera rotation only.
+        // Render sky first 
         glDepthMask(GL_FALSE);
         glDisable(GL_DEPTH_TEST);
         skyShader.use();

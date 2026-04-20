@@ -160,7 +160,7 @@ void Camera::calculateViewMatrix(const Window& window, const TileMap& tileMap) {
     if (glm::length(input) > 0.0f)
         input = glm::normalize(input);
 
-    // acceleration
+    // acceleration don't know if I want to add
     velocity += input * acceleration;
 
     // only damp when not pressing movement keys
@@ -171,16 +171,23 @@ void Camera::calculateViewMatrix(const Window& window, const TileMap& tileMap) {
     glm::vec3 newPos = position + velocity;
 
 
-    // terrain follow
+    // terrain follow bugged for  going downhill
     float terrainHeight = tileMap.getHeightAt(newPos.x, newPos.z);
     float eyeHeight = 1.8f;
+    //for if going uphill
     if (newPos.y < terrainHeight + eyeHeight)
         newPos.y = terrainHeight + eyeHeight;
-
+    // //for if going downhill
+    else if(newPos.y > terrainHeight)
+        //need to be subtracting  because we are going downhill 
+        newPos.y = terrainHeight + eyeHeight - (newPos.y - (terrainHeight + eyeHeight));
     if (!collidesWith(newPos, tileMap))
         position = newPos;
     else
         velocity = glm::vec3(0.0f);
+
+
+
 
     // subtle head bob based on speed
     float speedMag = glm::length(velocity);
